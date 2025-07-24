@@ -14,12 +14,9 @@ export default function Header() {
       try {
         const res = await fetch("/api/user", { method: "GET" });
         if (!res.ok) {
-          // console.log("Not authenticated, showing guest header");
           return;
         }
-
         const data: { user: User } = await res.json();
-        console.log(data);
         setRole(data.user.role);
       } catch (error) {
         console.error("Error fetching user:", error);
