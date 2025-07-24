@@ -44,6 +44,13 @@ export default function HomePage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleScrollToSection = (ref: React.RefObject<HTMLElement | null>) => {
+    ref.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Header */}
@@ -87,6 +94,7 @@ export default function HomePage() {
                 <Button
                   size="lg"
                   className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-full px-8 py-6 text-lg font-medium group"
+                  onClick={() => handleScrollToSection(featuresRef)}
                 >
                   Start Your Journey
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -95,6 +103,7 @@ export default function HomePage() {
                   variant="outline"
                   size="lg"
                   className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary rounded-full px-8 py-6 text-lg bg-transparent"
+                  onClick={() => handleScrollToSection(tailorsRef)}
                 >
                   Meet Our Tailors
                 </Button>
@@ -145,18 +154,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Scrolling Text Banner */}
-      <div className="bg-accent text-accent-foreground py-4 overflow-hidden">
-        <div className="animate-scroll-infinite whitespace-nowrap">
-          <span className="text-lg font-medium mx-8">
-            🎨 Custom Batik Design • 📏 Perfect Fit Guarantee • 🏆 Master
-            Craftsmen • 💬 Cultural Stories • 🌍 Local Languages Support • ✨
-            Heritage Meets Innovation • 🎨 Custom Batik Design • 📏 Perfect Fit
-            Guarantee • 🏆 Master Craftsmen • 💬 Cultural Stories •
-          </span>
-        </div>
-      </div>
 
       {/* How It Works Section */}
       <section ref={featuresRef} className="py-24 px-6 bg-cream">
@@ -335,8 +332,8 @@ export default function HomePage() {
                   <span className="ml-2 text-sm">{tailor.rating}</span>
                 </div>
                 <p className="text-primary-foreground/80 text-center text-sm leading-relaxed">
-                  "Batik is not just fabric, it&apos;s our heritage woven into
-                  every thread.&quot;
+                  &quot;Batik is not just fabric, it&apos;s our heritage woven
+                  into every thread.&quot;
                 </p>
               </div>
             ))}
