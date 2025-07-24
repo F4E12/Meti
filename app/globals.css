@@ -1,60 +1,112 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Serif+Display:ital@0;1&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    /* Light mode (default) */
+    --background: 0 0% 100%; /* White */
+    --foreground: 0 0% 3.9%; /* Nearly Black */
+
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 0 0% 3.9%; /* Nearly Black */
+
+    --popover: 0 0% 100%; /* White */
+    --popover-foreground: 0 0% 3.9%; /* Nearly Black */
+
+    /* Primary: Teal/Dark Cyan from your design */
+    --primary: 180 50% 25%; /* Dark Teal */
+    --primary-foreground: 0 0% 98%; /* White (for text on primary background) */
+
+    /* Secondary: Light Teal */
+    --secondary: 180 35% 65%; /* Light Teal */
+    --secondary-foreground: 0 0% 9%; /* Dark Gray (for text on secondary background) */
+
+    /* Muted: Soft off-white */
+    --muted: 0 0% 96.1%; /* Off-white */
+    --muted-foreground: 0 0% 45.1%; /* Medium Gray */
+
+    /* Accent: Bright Pink/Magenta from your palette */
+    --accent: 340 82% 52%; /* Bright Pink/Magenta */
+    --accent-foreground: 0 0% 98%; /* White (for text on accent background) */
+
+    --destructive: 0 84.2% 60.2%; /* Red */
+    --destructive-foreground: 0 0% 98%; /* White */
+
+    --border: 0 0% 89.8%; /* Light Gray */
+    --input: 0 0% 89.8%; /* Light Gray */
+    --ring: 180 50% 25%; /* Dark Teal (matches primary) */
+
+    /* Custom colors from your palette */
+    --coral: 14 100% 64%; /* Coral */
+    --coral-foreground: 0 0% 98%; /* White (for text on coral background) */
+
+    --burgundy: 0 45% 20%; /* Dark Burgundy */
+    --burgundy-foreground: 0 0% 98%; /* White (for text on burgundy background) */
+
+    --cream: 60 9% 96%; /* Cream */
+    --cream-foreground: 0 0% 3.9%; /* Nearly Black (for text on cream background) */
+
+    /* Chart colors using your palette */
+    --chart-1: 340 82% 52%; /* Pink */
+    --chart-2: 180 50% 25%; /* Teal */
+    --chart-3: 14 100% 64%; /* Coral */
+    --chart-4: 180 35% 65%; /* Light Teal */
+    --chart-5: 0 45% 20%; /* Burgundy */
+
     --radius: 0.5rem;
   }
+
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    /* Dark mode variants */
+    --background: 0 45% 20%; /* Dark Burgundy */
+    --foreground: 0 0% 98%; /* White */
+
+    --card: 0 45% 20%; /* Dark Burgundy */
+    --card-foreground: 0 0% 98%; /* White */
+
+    --popover: 0 45% 20%; /* Dark Burgundy */
+    --popover-foreground: 0 0% 98%; /* White */
+
+    /* Primary: Lighter teal for dark mode */
+    --primary: 180 35% 65%; /* Light Teal */
+    --primary-foreground: 0 0% 9%; /* Dark Gray */
+
+    --secondary: 180 50% 15%; /* Muted Dark Teal */
+    --secondary-foreground: 0 0% 98%; /* White */
+
+    --muted: 180 50% 15%; /* Muted Dark Teal */
+    --muted-foreground: 0 0% 63.9%; /* Light Gray */
+
+    /* Accent: Slightly muted pink for dark mode */
+    --accent: 340 70% 45%; /* Muted Pink/Magenta */
+    --accent-foreground: 0 0% 98%; /* White */
+
+    --destructive: 0 62.8% 30.6%; /* Dark Red */
+    --destructive-foreground: 0 0% 98%; /* White */
+
+    --border: 180 50% 15%; /* Muted Dark Teal */
+    --input: 180 50% 15%; /* Muted Dark Teal */
+    --ring: 180 35% 65%; /* Light Teal (matches primary) */
+
+    /* Custom colors adjusted for dark mode */
+    --coral: 14 85% 55%; /* Muted Coral */
+    --coral-foreground: 0 0% 98%; /* White */
+
+    --burgundy: 0 35% 25%; /* Darker Burgundy */
+    --burgundy-foreground: 0 0% 98%; /* White */
+
+    --cream: 180 50% 15%; /* Muted Dark Teal (used as cream in dark mode context) */
+    --cream-foreground: 0 0% 98%; /* White */
+
+    /* Chart colors for dark mode */
+    --chart-1: 340 70% 45%; /* Muted Pink */
+    --chart-2: 180 35% 65%; /* Light Teal */
+    --chart-3: 14 85% 55%; /* Muted Coral */
+    --chart-4: 180 25% 45%; /* Desaturated Teal */
+    --chart-5: 0 35% 35%; /* Darker Burgundy */
   }
 }
 
@@ -62,7 +114,200 @@
   * {
     @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    /* Force light mode as default */
+    color-scheme: light;
+  }
+
+  /* Ensure light mode is default */
+  html {
+    color-scheme: light;
+    scroll-behavior: smooth;
+  }
+
+  /* Set default fonts for headings */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-serif;
+  }
+
+  /* Ensure body text uses DM Sans */
+  p,
+  span,
+  div,
+  a,
+  button,
+  input,
+  textarea,
+  label {
+    @apply font-sans;
+  }
+}
+
+@layer components {
+  /* Custom utility classes for your brand colors */
+  .bg-coral {
+    background-color: hsl(var(--coral));
+  }
+
+  .text-coral {
+    color: hsl(var(--coral));
+  }
+
+  .bg-coral-foreground {
+    background-color: hsl(var(--coral-foreground));
+  }
+
+  .text-coral-foreground {
+    color: hsl(var(--coral-foreground));
+  }
+
+  .bg-burgundy {
+    background-color: hsl(var(--burgundy));
+  }
+
+  .text-burgundy {
+    color: hsl(var(--burgundy));
+  }
+
+  .bg-cream {
+    background-color: hsl(var(--cream));
+  }
+
+  .text-cream {
+    color: hsl(var(--cream));
+  }
+
+  /* Font utility classes */
+  .font-title {
+    @apply font-serif;
+  }
+
+  .font-body {
+    @apply font-sans;
+  }
+}
+
+@layer utilities {
+  /* Fancy scroll animations */
+  @keyframes scroll-infinite {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-20px) rotate(5deg);
+    }
+  }
+
+  @keyframes float-delayed {
+    0%,
+    100% {
+      transform: translateY(0px) rotate(45deg);
+    }
+    50% {
+      transform: translateY(-15px) rotate(50deg);
+    }
+  }
+
+  @keyframes pulse-slow {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+  }
+
+  @keyframes pulse-slow-delayed {
+    0%,
+    100% {
+      opacity: 0.8;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+  }
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-scroll-infinite {
+    animation: scroll-infinite 30s linear infinite;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-float-delayed {
+    animation: float-delayed 8s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 4s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow-delayed {
+    animation: pulse-slow-delayed 4s ease-in-out infinite 2s;
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.8s ease-out forwards;
+  }
+
+  /* Gradient utilities using your color palette */
+  .bg-gradient-teal-pink {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary)) /* Dark Teal */,
+      hsl(var(--accent)) /* Bright Pink/Magenta */
+    );
+  }
+
+  .bg-gradient-coral-pink {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--coral)) /* Coral */,
+      hsl(var(--accent)) /* Bright Pink/Magenta */
+    );
+  }
+
+  /* Hover effects */
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   }
 }

@@ -1,0 +1,183 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import {
+  User,
+  Menu,
+  Search,
+  ShoppingBag,
+  MessageCircle,
+  Palette,
+  X,
+  Scissors,
+  Bookmark,
+} from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+
+export default function CustomerHeader() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  return (
+    <>
+      <header className="bg-background/80 backdrop-blur-md border-b border-border/50 px-6 py-4 sticky top-0 z-50">
+        <div className="flex items-center justify-between max-w-7xl mx-auto">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-3 group">
+            <div className="w-10 h-10 bg-gradient-teal-pink rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
+              <span className="text-white font-bold text-lg">M</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-2xl font-serif font-bold text-foreground leading-none">
+                METI
+              </span>
+              <span className="text-xs text-muted-foreground font-medium tracking-wide">
+                HERITAGE CRAFT
+              </span>
+            </div>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center space-x-8">
+            <Link
+              href="/"
+              className="text-sm font-medium text-foreground hover:text-primary transition-colors relative group"
+            >
+              HOME
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+            </Link>
+            <Link
+              href="/shop"
+              className="text-sm font-medium text-foreground hover:text-primary transition-colors relative group flex items-center space-x-1"
+            >
+              <ShoppingBag className="h-4 w-4" />
+              <span>SHOP</span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+            </Link>
+            <Link
+              href="/design"
+              className="text-sm font-medium text-foreground hover:text-primary transition-colors relative group flex items-center space-x-1"
+            >
+              <Palette className="h-4 w-4" />
+              <span>DESIGN</span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+            </Link>
+            <Link
+              href="/chat"
+              className="text-sm font-medium text-foreground hover:text-primary transition-colors relative group flex items-center space-x-1"
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span>CHAT</span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+            </Link>
+            <Link
+              href="/tailors"
+              className="text-sm font-medium text-foreground hover:text-primary transition-colors relative group flex items-center space-x-1"
+            >
+              <Scissors className="h-4 w-4" />
+              <span>TAILORS</span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+            </Link>
+          </nav>
+
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center space-x-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-full p-2 relative"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-full p-2 relative"
+            >
+              <Bookmark className="h-4 w-4" />
+            </Button>
+            <Link href="/profile">
+              <Button variant="ghost" size="sm" className="rounded-full p-2">
+                <User className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="md:hidden p-2"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </Button>
+        </div>
+      </header>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden bg-background/95 backdrop-blur-md border-b border-border/50 px-6 py-4 sticky top-[73px] z-40">
+          <nav className="flex flex-col space-y-4">
+            <Link
+              href="/"
+              className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              HOME
+            </Link>
+            <Link
+              href="/shop"
+              className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2 flex items-center space-x-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <ShoppingBag className="h-4 w-4" />
+              <span>SHOP</span>
+            </Link>
+            <Link
+              href="/design"
+              className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2 flex items-center space-x-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <Palette className="h-4 w-4" />
+              <span>DESIGN</span>
+            </Link>
+            <Link
+              href="/chat"
+              className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2 flex items-center space-x-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span>CHAT</span>
+            </Link>
+            <Link
+              href="/tailors"
+              className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2 flex items-center space-x-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <Scissors className="h-4 w-4" />
+              <span>TAILORS</span>
+            </Link>
+            <div className="flex items-center justify-between pt-4 border-t border-border/50">
+              <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button variant="ghost" size="sm" className="rounded-full">
+                  <User className="h-4 w-4 mr-2" />
+                  PROFILE
+                </Button>
+              </Link>
+              <div className="flex space-x-2">
+                <Button variant="ghost" size="sm" className="rounded-full p-2">
+                  <Bookmark className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </nav>
+        </div>
+      )}
+    </>
+  );
+}
