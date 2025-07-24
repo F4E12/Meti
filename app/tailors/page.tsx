@@ -42,6 +42,7 @@ export default function TailorsPage() {
     Record<string, number>
   >({});
   const [avgRating, setAvgRating] = useState(0);
+  const [chatLoading, setChatLoading] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -86,7 +87,7 @@ export default function TailorsPage() {
             counts[t.user_id] = 0;
           }
 
-          const rating = t.TailorDetails?.[0]?.rating ?? 0; // Access first element of array
+          const rating = t.TailorDetails?.[0]?.rating ?? 0;
           if (typeof rating === "number" && !Number.isNaN(rating)) {
             totalRating += rating;
             ratingCount += 1;
@@ -161,6 +162,25 @@ export default function TailorsPage() {
 
     setFilteredTailors(filtered);
   }, [tailors, searchQuery, locationFilter, ratingFilter, sortBy]);
+
+  const handleChatClick = async (tailorId: string) => {
+    setChatLoading((prev) => ({ ...prev, [tailorId]: true }));
+    try {
+      const res = await fetch("/api/chats/check-or-create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tailorId }),
+      });
+      if (!res.ok) throw new Error("Failed to check or create chat");
+      const data = await res.json();
+      router.push(`/chat/${data.chat.chat_id}`);
+    } catch (error) {
+      console.error("Error initiating chat:", error);
+      alert("Failed to start chat. Please try again.");
+    } finally {
+      setChatLoading((prev) => ({ ...prev, [tailorId]: false }));
+    }
+  };
 
   if (!isLoading && role !== "customer") {
     router.push("/");
@@ -372,15 +392,18 @@ export default function TailorsPage() {
 
                       {/* Actions */}
                       <div className="flex space-x-3 pt-4">
-                        <Link
-                          href={`/tailors/${tailor.user_id}`}
-                          className="flex-1"
+                        <Button
+                          className="w-full bg-gradient-teal-pink hover:opacity-90 text-white rounded-xl group"
+                          onClick={() => handleChatClick(tailor.user_id)}
+                          disabled={chatLoading[tailor.user_id]}
                         >
-                          <Button className="w-full bg-gradient-teal-pink hover:opacity-90 text-white rounded-xl group">
-                            Chat
+                          {chatLoading[tailor.user_id] ? (
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          ) : (
                             <MessageCircle className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                          </Button>
-                        </Link>
+                          )}
+                          Chat
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
