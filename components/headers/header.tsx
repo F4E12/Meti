@@ -5,6 +5,7 @@ import type { User } from "@/lib/model/user";
 import GuestHeader from "./guest-header";
 import CustomerHeader from "./customer-header";
 import TailorHeader from "./tailor-header";
+import Image from "next/image";
 
 export default function Header() {
   const [role, setRole] = useState<"guest" | "customer" | "tailor" | "loading">(
@@ -33,11 +34,18 @@ export default function Header() {
   // Show a minimal loading header while fetching user data
   if (role === "loading") {
     return (
-      <header className="bg-background/80 backdrop-blur-md border-b border-border/50 px-6 py-4 sticky top-0 z-50">
+      <header className="bg-background/0 backdrop-blur-md border-b border-border/50 px-6 py-4 sticky top-0 z-50">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-teal-pink rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">M</span>
+              <span className="text-white font-bold text-sm">
+                <Image
+                  src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/dummy/LOGO.svg"
+                  width={24}
+                  height={24}
+                  alt=""
+                />
+              </span>
             </div>
             <span className="text-2xl font-serif font-bold text-foreground">
               METI
