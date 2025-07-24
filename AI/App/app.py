@@ -1,0 +1,240 @@
+from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS
+import os
+import uuid
+import cv2
+import numpy as np
+from sklearn.cluster import KMeans
+import tempfile
+import os
+from pose_measure import process_pose_measurements
+from flask import Flask, request, jsonify, url_for
+from flask_cors import CORS # Import CORS
+from werkzeug.utils import secure_filename
+import mediapipe as mp
+from mediapipe import solutions
+from mediapipe.framework.formats import landmark_pb2
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
+import numpy as np
+import math
+import matplotlib.pyplot as plt
+
+app = Flask(__name__)
+CORS(app)
+
+UPLOAD_FOLDER = 'uploads'
+RECOLORED_FOLDER = 'recolored'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(RECOLORED_FOLDER, exist_ok=True)
+
+# In-memory session storage
+session_data = {}
+
+# Function to get dominant colors using KMeans
+def get_dominant_colors(image, k=5):
+    img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    pixels = img_rgb.reshape(-1, 3)
+    kmeans = KMeans(n_clusters=k, random_state=42).fit(pixels)
+    return kmeans.cluster_centers_.astype(int), kmeans.labels_
+
+# Function to replace original colors with user-defined ones
+def replace_colors(image, colors, labels, color_map):
+    img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    pixels = img_rgb.reshape(-1, 3)
+    output_pixels = pixels.copy()
+
+    for i, _ in enumerate(colors):
+        mask = (labels == i)
+        output_pixels[mask] = color_map[i]
+
+    recolored_img = output_pixels.reshape(image.shape)
+    return cv2.cvtColor(recolored_img, cv2.COLOR_RGB2BGR)
+
+# ----------- ROUTES -----------
+
+@app.route("/upload", methods=["POST"])
+def upload_image():
+    image_file = request.files.get('image')
+    if not image_file:
+        return jsonify({"error": "No image uploaded"}), 400
+
+    filename = f"{uuid.uuid4()}.jpg"
+    path = os.path.join(UPLOAD_FOLDER, filename)
+    image_file.save(path)
+
+    image = cv2.imread(path)
+    colors, labels = get_dominant_colors(image, k=5)
+
+    # Save data to memory
+    session_data[filename] = {
+        "path": path,
+        "colors": colors.tolist(),
+        "labels": labels.tolist(),
+        "shape": image.shape
+    }
+
+    return jsonify({
+        "image_id": filename,
+        "colors": colors.tolist()
+    })
+
+@app.route("/recolor", methods=["POST"])
+def recolor_image():
+    data = request.get_json()
+    image_id = data.get("image_id")
+    color_map = data.get("color_map")
+
+    if not image_id or image_id not in session_data:
+        return jsonify({"error": "Invalid or missing image_id"}), 400
+
+    meta = session_data[image_id]
+    image = cv2.imread(meta["path"])
+    original_colors = np.array(meta["colors"])
+    labels = np.array(meta["labels"])
+    new_colors = np.array(color_map)
+
+    recolored_img = replace_colors(image, original_colors, labels, new_colors)
+
+    output_path = os.path.join(RECOLORED_FOLDER, image_id)
+    cv2.imwrite(output_path, recolored_img)
+
+    return send_file(output_path, mimetype='image/jpeg')
+
+app.config['UPLOAD_FOLDER'] = 'static/uploads/'
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
+
+# Ensure the upload folder exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+# --- Keep all your helper functions the same ---
+# draw_landmarks_on_image(rgb_image, detection_result)
+# calc_pixel_distance(lm1, lm2, image_width, image_height)
+# detect_coin_scale(frame_bgr, reference_logo_path, coin_real_diameter_cm)
+# allowed_file(filename)
+# ... (paste your original helper functions here without changes) ...
+
+# <--- Paste your helper functions here --->
+def draw_landmarks_on_image(rgb_image, detection_result):
+    pose_landmarks_list = detection_result.pose_landmarks
+    annotated_image = np.copy(rgb_image)
+    for pose_landmarks in pose_landmarks_list:
+        pose_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
+        pose_landmarks_proto.landmark.extend([landmark_pb2.NormalizedLandmark(x=lm.x, y=lm.y, z=lm.z) for lm in pose_landmarks])
+        solutions.drawing_utils.draw_landmarks(annotated_image,pose_landmarks_proto,solutions.pose.POSE_CONNECTIONS,landmark_drawing_spec=solutions.drawing_utils.DrawingSpec(color=(0, 255, 0), thickness=5, circle_radius=3),connection_drawing_spec=solutions.drawing_utils.DrawingSpec(color=(0, 0, 255), thickness=5))
+    return annotated_image
+
+def calc_pixel_distance(lm1, lm2, image_width, image_height):
+    x1, y1 = lm1.x * image_width, lm1.y * image_height
+    x2, y2 = lm2.x * image_width, lm2.y * image_height
+    return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+
+def detect_coin_scale(frame_bgr, reference_logo_path, coin_real_diameter_cm=2.4):
+    reference_logo = cv2.imread(reference_logo_path, 0)
+    if reference_logo is None:
+        raise FileNotFoundError(f"Reference logo not found at {reference_logo_path}")
+    reference_logo = cv2.resize(reference_logo, (int(reference_logo.shape[1] * 0.3), int(reference_logo.shape[0] * 0.3)))
+    reference_logo = cv2.Canny(reference_logo, 100, 200)
+    tH, tW = reference_logo.shape[:2]
+    scales = np.linspace(0.02, 1.0, 20)[::-1]
+    found = None
+    gray = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
+    for scale in scales:
+        resized = cv2.resize(gray, (int(gray.shape[1] * scale), int(gray.shape[0] * scale)))
+        if resized.shape[0] < tH or resized.shape[1] < tW: break
+        rH = gray.shape[0] / float(resized.shape[0])
+        rW = gray.shape[1] / float(resized.shape[1])
+        edged = cv2.Canny(resized, 100, 200)
+        result = cv2.matchTemplate(edged, reference_logo, cv2.TM_CCOEFF)
+        (_, maxVal, _, maxLoc) = cv2.minMaxLoc(result)
+        if found is None or maxVal > found[0]:
+            found = (maxVal, maxLoc, rH, rW)
+    if found is not None and found[0] > 5500000.0:
+        (_, maxLoc, rH, rW) = found
+        (startX, startY) = (int(maxLoc[0] * rW), int(maxLoc[1] * rH))
+        (endX, endY) = (int((maxLoc[0] + tW) * rW), int((maxLoc[1] + tH) * rH))
+        cv2.rectangle(frame_bgr, (startX, startY), (endX, endY), (0, 255, 0), 3)
+        coin_diameter_px = (endX - startX + endY - startY) / 2
+        pixel_per_cm = coin_diameter_px / coin_real_diameter_cm
+        return pixel_per_cm, frame_bgr
+    else:
+        return None, frame_bgr
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+# <---------------------------------------->
+
+
+# --- New API Endpoint ---
+@app.route('/api/process-image', methods=['POST'])
+def process_image_api():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part in the request'}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        input_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(input_path)
+
+        # --- Image Processing Logic (same as before) ---
+        try:
+            coin_logo_path = "coin_reference.png"
+            image_bgr = cv2.imread(input_path)
+            
+            pixel_per_cm, image_with_coin_box = detect_coin_scale(image_bgr, coin_logo_path)
+            if pixel_per_cm is None:
+                return jsonify({'error': 'Reference coin not found. Cannot calculate measurements.'}), 400
+
+            base_options = python.BaseOptions(model_asset_path='pose_landmarker.task')
+            options = vision.PoseLandmarkerOptions(base_options=base_options, output_segmentation_masks=True)
+            detector = vision.PoseLandmarker.create_from_options(options)
+            image_rgb = cv2.cvtColor(image_with_coin_box, cv2.COLOR_BGR2RGB)
+            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image_rgb)
+            detection_result = detector.detect(mp_image)
+
+            if not detection_result.pose_landmarks:
+                return jsonify({'error': 'No pose detected in the image.'}), 400
+
+            annotated_image_rgb = draw_landmarks_on_image(mp_image.numpy_view(), detection_result)
+            
+            landmarks = detection_result.pose_landmarks[0]
+            lm11, lm12, lm13, lm14, lm23, lm24 = landmarks[11], landmarks[12], landmarks[13], landmarks[14], landmarks[23], landmarks[24]
+            image_width, image_height = mp_image.width, mp_image.height
+
+            def to_cm(dist_px): return dist_px / pixel_per_cm
+
+            measurements = {
+                "Right arm length": f"{to_cm(calc_pixel_distance(lm14, lm12, image_width, image_height)):.2f}",
+                "Shoulder width": f"{to_cm(calc_pixel_distance(lm11, lm12, image_width, image_height)):.2f}",
+                "Left arm length": f"{to_cm(calc_pixel_distance(lm11, lm13, image_width, image_height)):.2f}",
+                "Upper body height": f"{to_cm(calc_pixel_distance(lm12, lm24, image_width, image_height)):.2f}",
+                "Hip width": f"{to_cm(calc_pixel_distance(lm24, lm23, image_width, image_height)):.2f}"
+            }
+            
+            output_filename = 'processed_' + filename
+            output_path = os.path.join(app.config['UPLOAD_FOLDER'], output_filename)
+            annotated_image_bgr = cv2.cvtColor(annotated_image_rgb, cv2.COLOR_RGB2BGR)
+            cv2.imwrite(output_path, annotated_image_bgr)
+            
+            # Return the full URL for the processed image
+            image_url = url_for('static', filename=f'uploads/{output_filename}', _external=True)
+
+            # Success response
+            return jsonify({
+                'measurements': measurements,
+                'image_url': image_url
+            })
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+    return jsonify({'error': 'Invalid file type'}), 400
+
+# Run the Flask app
+if __name__ == "__main__":
+    app.run(debug=True)
