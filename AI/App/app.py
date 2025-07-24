@@ -7,7 +7,6 @@ import numpy as np
 from sklearn.cluster import KMeans
 import tempfile
 import os
-from pose_measure import process_pose_measurements
 from flask import Flask, request, jsonify, url_for
 from flask_cors import CORS # Import CORS
 from werkzeug.utils import secure_filename
@@ -27,6 +26,8 @@ UPLOAD_FOLDER = 'uploads'
 RECOLORED_FOLDER = 'recolored'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(RECOLORED_FOLDER, exist_ok=True)
+mp_pose = mp.solutions.pose
+mp_drawing = mp.solutions.drawing_utils
 
 # In-memory session storage
 session_data = {}
@@ -234,6 +235,104 @@ def process_image_api():
             return jsonify({'error': str(e)}), 500
 
     return jsonify({'error': 'Invalid file type'}), 400
+
+def extract_shirt_patch_from_image(image):
+    """
+    Processes an image array to extract a shirt patch and create a debug image.
+    Returns (patch_image, debug_image) or (None, None) on failure.
+    """
+    height, width, _ = image.shape
+    with mp_pose.Pose(static_image_mode=True, min_detection_confidence=0.5) as pose:
+        results = pose.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+
+        if not results.pose_landmarks:
+            return None, None
+
+        # Create the debug image with landmarks
+        annotated_image = np.copy(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        mp_drawing.draw_landmarks(
+            annotated_image,
+            results.pose_landmarks,
+            mp_pose.POSE_CONNECTIONS,
+            landmark_drawing_spec=mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2),
+            connection_drawing_spec=mp_drawing.DrawingSpec(color=(255, 0, 0), thickness=2)
+        )
+        debug_image = cv2.cvtColor(annotated_image, cv2.COLOR_RGB2BGR)
+
+        # Extract patch coordinates
+        landmarks = results.pose_landmarks.landmark
+        left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER]
+        right_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER]
+        right_hip = landmarks[mp_pose.PoseLandmark.RIGHT_HIP]
+
+        # Calculate patch center and size
+        shoulder_width_px = abs(left_shoulder.x * width - right_shoulder.x * width)
+        body_height_px = abs(right_shoulder.y * height - right_hip.y * height)
+        patch_size = round(shoulder_width_px // 5)
+
+        x1 = int(left_shoulder.x * width)
+        y1 = int(left_shoulder.y * height)
+        x2 = int(right_shoulder.x * width)
+        y2 = int(right_shoulder.y * height)
+        
+        # Center point calculation adjusted for better placement on the chest
+        shoulder = (left_shoulder.x * width - right_shoulder.x * width)
+        body = (right_shoulder.y * height - right_hip.y * height)
+        patch_size = round(shoulder // 5)
+        cx, cy = round((x1 + x2) // 2 + shoulder//4), round((y1 + y2) // 2 - body//5)
+
+        # Define patch boundaries
+        x_start = max(cx - patch_size, 0)
+        y_start = max(cy - patch_size, 0)
+        x_end = min(cx + patch_size, width)
+        y_end = min(cy + patch_size, height)
+        
+        # Crop the patch
+        patch = image[y_start:y_end, x_start:x_end]
+        if patch.size == 0:
+             return None, debug_image # Return debug image even if patch is empty
+             
+        patch_resized = cv2.resize(patch, (500, 500))
+
+        return patch_resized, debug_image
+
+@app.route('/extract-shirt-patch', methods=['POST'])
+def handle_extract_shirt_patch():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part in the request'}), 400
+    
+    file = request.files['file']
+    if file.filename == '' or not allowed_file(file.filename):
+        return jsonify({'error': 'Invalid or no file selected'}), 400
+
+    filename = secure_filename(file.filename)
+    
+    # Read image from filestorage object in memory
+    filestr = file.read()
+    npimg = np.frombuffer(filestr, np.uint8)
+    image_bgr = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+
+    patch_image, debug_image = extract_shirt_patch_from_image(image_bgr)
+
+    if patch_image is None and debug_image is None:
+        return jsonify({'error': 'No pose detected in the image.'}), 400
+
+    # Save patch image
+    patch_filename = f"patch_{filename}"
+    patch_path = os.path.join(app.config['UPLOAD_FOLDER'], patch_filename)
+    cv2.imwrite(patch_path, patch_image)
+    patch_url = url_for('static', filename=f'uploads/{patch_filename}', _external=True)
+
+    # Save debug image
+    debug_filename = f"debug_{filename}"
+    debug_path = os.path.join(app.config['UPLOAD_FOLDER'], debug_filename)
+    cv2.imwrite(debug_path, debug_image)
+    debug_url = url_for('static', filename=f'uploads/{debug_filename}', _external=True)
+
+    return jsonify({
+        'patch_image_url': patch_url,
+        'debug_image_url': debug_url
+    })
 
 # Run the Flask app
 if __name__ == "__main__":
