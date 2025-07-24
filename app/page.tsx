@@ -1,82 +1,11 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
-import { User } from "@/lib/model/user";
-import { User as UserIcon, Menu } from "lucide-react";
-import { useEffect } from "react";
+import Header from "@/components/headers/header";
 
 export default function HomePage() {
-  useEffect(() => {
-    const fetchUser = async () => {
-      const res = await fetch("/api/user");
-      if (!res.ok) {
-        console.error("Failed to fetch user");
-        return;
-      }
-
-      const data: { user: User } = await res.json();
-      console.log(data.user);
-    };
-
-    fetchUser();
-  }, []);
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border px-6 py-4">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <div className="flex items-center space-x-8">
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 bg-primary"></div>
-              <span className="text-xl font-bold text-foreground">METI</span>
-            </div>
-            <nav className="hidden md:flex items-center space-x-6">
-              <a
-                href="#"
-                className="text-sm text-foreground hover:text-primary"
-              >
-                HELP
-              </a>
-              <a
-                href="#"
-                className="text-sm text-foreground hover:text-primary"
-              >
-                ABOUT
-              </a>
-              <a
-                href="#"
-                className="text-sm text-foreground hover:text-primary"
-              >
-                MEDIUM
-              </a>
-              <a
-                href="#"
-                className="text-sm text-foreground hover:text-primary"
-              >
-                GENERAL
-              </a>
-              <a
-                href="#"
-                className="text-sm text-foreground hover:text-primary"
-              >
-                etc
-              </a>
-            </nav>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Button variant="default" size="sm" className="rounded-full px-6">
-              SEARCH
-            </Button>
-            <Button variant="ghost" size="icon">
-              <UserIcon className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="bg-primary text-primary-foreground py-20 px-6">

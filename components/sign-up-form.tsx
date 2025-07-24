@@ -80,6 +80,18 @@ export function SignUpForm({
 
       if (dbError) throw dbError;
 
+      if (role === "tailor") {
+        const { error: tailorError } = await supabase
+          .from("tailordetails")
+          .insert({
+            user_id: userId,
+            bio: null,
+            rating: 0.0,
+          });
+
+        if (tailorError) throw tailorError;
+      }
+
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
@@ -114,7 +126,7 @@ export function SignUpForm({
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="youremail@example.com"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -199,6 +211,12 @@ export function SignUpForm({
               Already have an account?{" "}
               <Link href="/auth/login" className="underline underline-offset-4">
                 Login
+              </Link>
+            </div>
+            <div className="mt-4 text-center text-sm">
+              Back to{" "}
+              <Link href="/" className="underline underline-offset-4">
+                Home
               </Link>
             </div>
           </form>

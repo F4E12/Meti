@@ -38,6 +38,7 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
+      // console.log(error);
       // Update this route to redirect to an authenticated route. The user already has an active session.
       router.push("/");
     } catch (error: unknown) {
@@ -64,7 +65,7 @@ export function LoginForm({
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="youremail@example.com"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -100,6 +101,12 @@ export function LoginForm({
                 className="underline underline-offset-4"
               >
                 Sign up
+              </Link>
+            </div>
+            <div className="mt-4 text-center text-sm">
+              Back to{" "}
+              <Link href="/" className="underline underline-offset-4">
+                Home
               </Link>
             </div>
           </form>
