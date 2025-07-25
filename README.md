@@ -48,7 +48,7 @@
 
 ### 🔐 Authentication
 
-<p float="left">
+<p style="display: flex; justify-content: left;">
   <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/login.jpg" height="300" />
   <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/register.jpg" height="300" />
 </p>
@@ -61,7 +61,7 @@
 ### 💬 Real-Time Chat with Translation
 
 <p align="center">
-  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/translate_chat.gif" width="70%" />
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/translate_chat.gif" alt="Real-Time Chat" width="70%" />
 </p>
 
 - Real-time communication between customers and tailors
@@ -72,7 +72,7 @@
 ### 🌟 Featured Weavers
 
 <p align="center">
-  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/2025-07-25%2019-50-50.gif" width="70%" />
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/2025-07-25%2019-50-50.gif" alt="Featured Weavers" width="70%" />
 </p>
 
 - Browse unique Batik patterns from local weavers
@@ -83,7 +83,7 @@
 ### 📏 AI Body Measurement
 
 <p align="center">
-  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/2025-07-25%2019-28-56.gif" width="70%" />
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/2025-07-25%2019-28-56.gif" alt="AI Body Measurement" width="70%" />
 </p>
 
 - AI-assisted body measurement using **MediaPipe Pose Landmark Detection**
@@ -100,7 +100,7 @@
 ### 📦 Orders
 
 <p align="center">
-  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/order.gif" width="70%" />
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/order.gif" alt="Orders" width="70%" />
 </p>
 
 - Place and manage custom clothing orders
@@ -111,7 +111,7 @@
 ### 👤 User Profile
 
 <p align="center">
-  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/pofile.jpg" height="300" />
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/pofile.jpg" alt="User Profile" height="300" />
 </p>
 
 - Manage user information
@@ -122,7 +122,7 @@
 ### 🧵 Tailors Directory
 
 <p align="center">
-  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/tailors.gif" width="70%" />
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/tailors.gif" alt="Tailors Directory" width="70%" />
 </p>
 
 - View list of available tailors
@@ -133,7 +133,7 @@
 ### 🛠️ Tailor Workspace
 
 <p align="center">
-  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/2025-07-25%2019-38-29.gif" width="70%" />
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/2025-07-25%2019-38-29.gif" alt="Tailor Workspace" width="70%" />
 </p>
 
 - Tailor dashboard to manage customer designs and orders
@@ -145,7 +145,7 @@
 ### 🏠 Homepage
 
 <p align="center">
-  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/home.jpg" height="300" />
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/home.jpg" alt="Homepage" height="300" />
 </p>
 
 - Introduction to Meti
@@ -190,7 +190,7 @@ npm run dev
 
 ## 🧠 Running the Flask AI API
 
-The AI feature are powered by a separate Flask API.
+The AI features are powered by a separate Flask API.
 
 ### 📂 Location
 
@@ -220,7 +220,7 @@ python app.py
 By default, it runs at:
 
 ```
-http://http://127.0.0.1:5000
+http://127.0.0.1:5000
 ```
 
 Make sure this backend is running when using the main application, especially for all AI services.
