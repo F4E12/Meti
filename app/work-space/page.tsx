@@ -4,7 +4,6 @@ import type React from "react";
 import { ImageIcon } from "lucide-react";
 import { useState, useRef } from "react";
 import {
-  User,
   Plus,
   Upload,
   X,
@@ -113,9 +112,6 @@ export default function WorkspacePage() {
     }));
   };
 
-  const [patchUrl, setPatchUrl] = useState("");
-  const [debugUrl, setDebugUrl] = useState("");
-
   const handleExtractDesign = async () => {
     if (!newDesign.image) return;
 
@@ -174,14 +170,6 @@ export default function WorkspacePage() {
       }
     }
   };
-
-  const toBase64 = (file: File): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
 
   const resetModal = () => {
     setShowNewDesignModal(false);
@@ -282,20 +270,6 @@ export default function WorkspacePage() {
             </div>
           ))}
         </div>
-
-        {/* Footer */}
-        <footer className="bg-meti-teal text-white rounded-2xl p-8">
-          <div>
-            <h3 className="font-semibold mb-4">Office</h3>
-            <div className="space-y-2 text-sm text-white/90">
-              <p>asisted@meti.co.id</p>
-              <p>+6292-382-903</p>
-              <p>
-                RAGUNAN, Singapura, Garut Regency, West Java 44173, Indonesia
-              </p>
-            </div>
-          </div>
-        </footer>
       </div>
 
       {/* Orders Modal */}
