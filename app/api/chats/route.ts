@@ -1,10 +1,15 @@
-import { Chat } from "@/lib/model/chat";
-import { User } from "@/lib/model/user";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 
 // Define the expected shape of the Supabase response for type safety
+interface SupabaseTailorDetails {
+  user_id: string;
+  bio: string | null;
+  rating: number;
+  created_at: string;
+}
+
 interface SupabaseUser {
   user_id: string;
   username: string;
@@ -20,13 +25,7 @@ interface SupabaseUser {
   upper_body_height: number | null;
   hip_width: number | null;
   created_at: string;
-}
-
-interface SupabaseTailorDetails {
-  user_id: string;
-  bio: string | null;
-  rating: number;
-  created_at: string;
+  TailorDetails: { bio: string | null; rating: number }[] | null;
 }
 
 interface SupabaseChat {
@@ -46,6 +45,25 @@ interface SupabaseMessage {
   created_at: string;
 }
 
+interface ThisChat {
+  chat_id: string;
+  user_id: string;
+  tailor_id: string;
+  created_at: string;
+  customer: SupabaseUser;
+  tailor: SupabaseUser;
+  last_message?: {
+    message_id: string;
+    chat_id: string;
+    sender_id: string;
+    content: string;
+    translated_content: Record<string, string> | null;
+    language: string | null;
+    created_at: string;
+    sender: SupabaseUser;
+  };
+}
+
 export async function GET() {
   const supabase = createClient();
 
@@ -56,9 +74,12 @@ export async function GET() {
   } = await (await supabase).auth.getUser();
 
   if (authError || !authUser) {
-    console.error("Auth error:", authError?.message);
+    console.error(
+      "Authentication failed:",
+      authError?.message || "No user found"
+    );
     return NextResponse.json(
-      { error: authError?.message || "Unauthorized" },
+      { error: authError?.message || "Unauthorized access" },
       { status: 401 }
     );
   }
@@ -72,7 +93,10 @@ export async function GET() {
     .returns<SupabaseChat[]>();
 
   if (chatsError || !chatsData) {
-    console.error("Error fetching chats:", chatsError?.message);
+    console.error(
+      "Failed to fetch chats:",
+      chatsError?.message || "No chats retrieved"
+    );
     return NextResponse.json(
       { error: chatsError?.message || "Failed to fetch chats" },
       { status: 500 }
@@ -115,7 +139,10 @@ export async function GET() {
     .returns<SupabaseUser[]>();
 
   if (usersError || !usersData) {
-    console.error("Error fetching users:", usersError?.message);
+    console.error(
+      "Failed to fetch users:",
+      usersError?.message || "No user data retrieved"
+    );
     return NextResponse.json(
       { error: usersError?.message || "Failed to fetch user data" },
       { status: 500 }
@@ -127,18 +154,22 @@ export async function GET() {
     .filter((user) => user.role === "tailor")
     .map((user) => user.user_id);
 
-  let tailorDetailsData: SupabaseTailorDetails[] = [];
+  let tailorDetailsData: {
+    user_id: string;
+    bio: string | null;
+    rating: number;
+  }[] = [];
   if (tailorIds.length > 0) {
     const { data, error: tailorDetailsError } = await (await supabase)
-      .from("TailorDetails")
-      .select("user_id, bio, rating, created_at")
+      .from("tailordetails")
+      .select("user_id, bio, rating")
       .in("user_id", tailorIds)
-      .returns<SupabaseTailorDetails[]>();
+      .returns<{ user_id: string; bio: string | null; rating: number }[]>();
 
     if (tailorDetailsError || !data) {
       console.error(
-        "Error fetching tailor details:",
-        tailorDetailsError?.message
+        "Failed to fetch tailor details:",
+        tailorDetailsError?.message || "No tailor details retrieved"
       );
       return NextResponse.json(
         {
@@ -153,32 +184,40 @@ export async function GET() {
 
   // Step 4: Fetch the latest message for each chat
   const chatIds = chatsData.map((chat) => chat.chat_id);
-  const { data: messagesData, error: messagesError } = await (await supabase)
-    .from("Messages")
+  const { data: messagesData, error: messagesError } = await (
+    await supabase
+  )
+    .from("messages")
     .select(
-      "message_id, chat_id, sender_id, content, translated_content, language, created_at"
+      `
+      message_id,
+      chat_id,
+      sender_id,
+      content,
+      translated_content,
+      language,
+      created_at
+      `
     )
     .in("chat_id", chatIds)
     .order("created_at", { ascending: false })
-    .limit(1, { foreignTable: "chat_id" })
     .returns<SupabaseMessage[]>();
 
   if (messagesError) {
-    console.error("Error fetching messages:", messagesError?.message);
-    return NextResponse.json(
-      { error: messagesError?.message || "Failed to fetch messages" },
-      { status: 500 }
+    console.warn(
+      "Failed to fetch messages, proceeding with empty messages:",
+      messagesError.message
     );
   }
 
   // Step 5: Combine data into Chat interface
-  const chats: Chat[] = chatsData.map((chat) => {
+  const chats: ThisChat[] = chatsData.map((chat) => {
     const customer = usersData.find((user) => user.user_id === chat.user_id);
     const tailor = usersData.find((user) => user.user_id === chat.tailor_id);
     const tailorDetails = tailorDetailsData.find(
       (details) => details.user_id === chat.tailor_id
     );
-    const lastMessage = messagesData.find(
+    const lastMessage = messagesData?.find(
       (msg) => msg.chat_id === chat.chat_id
     );
 
@@ -197,7 +236,7 @@ export async function GET() {
                     .map((td) => ({ bio: td.bio, rating: td.rating }))
                 : null,
           }
-        : ({} as User),
+        : ({} as SupabaseUser),
       tailor: tailor
         ? {
             ...tailor,
@@ -205,7 +244,7 @@ export async function GET() {
               ? [{ bio: tailorDetails.bio, rating: tailorDetails.rating }]
               : null,
           }
-        : ({} as User),
+        : ({} as SupabaseUser),
       last_message: lastMessage
         ? {
             message_id: lastMessage.message_id,
@@ -219,7 +258,7 @@ export async function GET() {
               const senderUser = usersData.find(
                 (user) => user.user_id === lastMessage.sender_id
               );
-              if (!senderUser) return {} as User;
+              if (!senderUser) return {} as SupabaseUser;
               const senderTailorDetails = tailorDetailsData.find(
                 (td) => td.user_id === senderUser.user_id
               );
@@ -322,7 +361,7 @@ export async function POST(request: Request) {
   const { data: tailorDetailsData, error: tailorDetailsError } = await (
     await supabase
   )
-    .from("TailorDetails")
+    .from("tailordetails")
     .select("bio, rating")
     .eq("user_id", tailorId)
     .single()
@@ -423,7 +462,7 @@ export async function POST(request: Request) {
   }
 
   // Construct the Chat response
-  const chat: Chat = {
+  const chat: ThisChat = {
     chat_id: newChatData.chat_id,
     user_id: newChatData.user_id,
     tailor_id: newChatData.tailor_id,

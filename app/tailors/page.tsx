@@ -171,12 +171,14 @@ export default function TailorsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tailorId }),
       });
-      if (!res.ok) throw new Error("Failed to check or create chat");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to check or create chat");
+      }
       const data = await res.json();
       router.push(`/chat/${data.chat.chat_id}`);
     } catch (error) {
       console.error("Error initiating chat:", error);
-      alert("Failed to start chat. Please try again.");
     } finally {
       setChatLoading((prev) => ({ ...prev, [tailorId]: false }));
     }
