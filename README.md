@@ -25,6 +25,7 @@ Meti is a full-stack web application that allows customers to design their own B
 
 - Sandbox to design custom Batik T-shirts
 - Interactive Batik pattern editor
+- Extract colors from uploaded images and allow users to customize the color palette
 
 ### 🔐 Auth
 
@@ -33,6 +34,7 @@ Meti is a full-stack web application that allows customers to design their own B
 ### 💬 Chat
 
 - Real-time communication between customers and tailors
+- AI-powered translation support for various regional languages in Indonesia
 
 ### 🌟 Featured Weavers
 
@@ -72,6 +74,7 @@ Meti is a full-stack web application that allows customers to design their own B
 
 - Tailor dashboard to manage orders and designs
 - Add new orders and communicate with customers
+- AI that can extract Batik patterns from photos of people wearing Batik and generate editable design templates
 
 ### 🏠 Homepage
 

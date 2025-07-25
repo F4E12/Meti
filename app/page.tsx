@@ -345,6 +345,7 @@ export default function HomePage() {
                 name: "Parang Rusak Modern",
                 tailor: "Pak Suharto, Yogyakarta",
                 price: "Rp 850.000",
+                image: "/assets/dummy_batik_1.jpg",
               },
               {
                 name: "Kawung Contemporary",

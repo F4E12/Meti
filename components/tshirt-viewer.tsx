@@ -277,7 +277,7 @@ const ThreeShirtViewer: React.FC<ThreeShirtViewerProps> = ({
         ref={threeJsWrapperRef}
         className="w-[360px] h-[360px]"
       />
-      <div style={{ marginTop: "20px", textAlign: "center" }}>
+      {/* <div style={{ marginTop: "20px", textAlign: "center" }}>
         <input
           type="file"
           id="textureInput"
@@ -286,7 +286,7 @@ const ThreeShirtViewer: React.FC<ThreeShirtViewerProps> = ({
           onChange={handleTextureUpload}
         />
         <button onClick={handleRemoveTexture}>Remove Texture</button>
-      </div>
+      </div> */}
     </div>
   );
 };

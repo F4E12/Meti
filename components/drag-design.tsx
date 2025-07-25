@@ -380,7 +380,7 @@ const CanvasEditor: React.FC<CanvasEditorProps> = ({
   const currentConfig = canvasConfigs[selectedPartIndex];
 
   return (
-    <div className="h-full p-5">
+    <div className="h-full">
       {currentConfig ? (
         <div className="h-full justify-center flex flex-col items-center">
           <canvas

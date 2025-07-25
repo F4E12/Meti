@@ -449,7 +449,7 @@ export default function TailorsPage() {
             Connect with our master tailors and bring your batik vision to life
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/design">
+            <Link href="/3d-design">
               <Button
                 size="lg"
                 className="bg-coral-foreground text-coral hover:bg-coral-foreground/90 rounded-full px-8 py-6 text-lg font-medium hover-lift font-body"
@@ -491,7 +491,7 @@ export default function TailorsPage() {
               </h4>
               <div className="space-y-2 text-burgundy-foreground/80 font-body">
                 <Link
-                  href="/design"
+                  href="/3d-design"
                   className="block hover:text-burgundy-foreground transition-colors hover-lift"
                 >
                   Design Studio

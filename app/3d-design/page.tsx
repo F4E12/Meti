@@ -183,7 +183,7 @@ const CreateDesignPage = () => {
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Upload className="w-5 h-5 text-blue-500" />
-                Upload Image
+                Upload Batik Pattern
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -286,7 +286,7 @@ const CreateDesignPage = () => {
 
         {/* Main Content Area */}
         <div className="flex-1 p-6">
-          <div className="grid lg:grid-cols-2 gap-6 h-full">
+          <div className="grid lg:grid-cols-2 rounded-2xl gap-6 h-max">
             {/* 3D Viewer */}
             <Card className="shadow-lg">
               <CardHeader className="pb-3">
