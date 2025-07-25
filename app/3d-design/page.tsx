@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import Header from "@/components/headers/header";
 
 const CreateDesignPage = () => {
   const [active, setActive] = useState(0);
@@ -142,6 +143,7 @@ const CreateDesignPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Header */}
+      <Header />
       <div className="bg-white border-b border-slate-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
