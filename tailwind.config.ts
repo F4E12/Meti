@@ -70,6 +70,12 @@ const config: Config = {
           DEFAULT: "hsl(var(--cream))",
           foreground: "hsl(var(--cream-foreground))",
         },
+        "meti-teal": "#206877",
+        "meti-orange": "#f3714a",
+        "meti-pink": "#dd2b64",
+        "meti-cream": "#fafaf5",
+        "meti-dark": "#2e141b",
+        "meti-light": "#a5566f",
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -232,6 +232,7 @@ def process_image_api():
             })
 
         except Exception as e:
+            print(f"Error processing image: {e}")
             return jsonify({'error': str(e)}), 500
 
     return jsonify({'error': 'Invalid file type'}), 400

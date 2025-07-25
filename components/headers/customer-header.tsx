@@ -12,6 +12,7 @@ import {
   Scissors,
   Bookmark,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -20,15 +21,20 @@ export default function CustomerHeader() {
 
   return (
     <>
-      <header className="bg-background/80 backdrop-blur-md border-b border-border/50 px-6 py-4 sticky top-0 z-50">
+      <header className="bg-background/0 backdrop-blur-md border-b border-border/50 px-6 py-4 sticky top-0 z-50">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 bg-gradient-teal-pink rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
-              <span className="text-white font-bold text-lg">M</span>
+          <Link href="/" className="flex items-center group gap-2">
+            <div className="">
+              <Image
+                src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/dummy/LOGO.svg"
+                width={24}
+                height={24}
+                alt=""
+              />
             </div>
             <div className="flex flex-col">
-              <span className="text-2xl font-serif font-bold text-foreground leading-none">
+              <span className="text-2xl font-serif font-bold text-white/90 leading-none">
                 METI
               </span>
               <span className="text-xs text-muted-foreground font-medium tracking-wide">
