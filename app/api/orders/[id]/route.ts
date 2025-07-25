@@ -1,13 +1,12 @@
-// /app/api/orders/[id]/route.ts
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = await createClient();
-  const order_id = params.id;
+  const { id: order_id } = await params;
 
   // Get authenticated user
   const {
@@ -40,7 +39,7 @@ export async function GET(
   const { data: orderData, error: orderError } = await (await supabase)
     .from("orders")
     .select(
-      "order_id, user_id, tailor_id, status, order_date, delivery_date, created_at, design_id, user_design_id"
+      "order_id, user_id, tailor_id, status, design_url, order_date, delivery_date, created_at"
     )
     .eq("order_id", order_id)
     .or(`user_id.eq.${authUser.id},tailor_id.eq.${authUser.id}`)
@@ -82,28 +81,6 @@ export async function GET(
     console.error(tailorDetailsError);
   }
 
-  // Fetch design details if design_id exists
-  let design = null;
-  if (orderData.design_id) {
-    const { data, error } = await (await supabase)
-      .from("designs")
-      .select("design_id, original_image_url, description")
-      .eq("design_id", orderData.design_id)
-      .single();
-    if (!error && data) design = data;
-  }
-
-  // Fetch user design details if user_design_id exists
-  let userDesign = null;
-  if (orderData.user_design_id) {
-    const { data, error } = await (await supabase)
-      .from("userdesigns")
-      .select("user_design_id, customized_image_url, color_palette")
-      .eq("user_design_id", orderData.user_design_id)
-      .single();
-    if (!error && data) userDesign = data;
-  }
-
   if (customerError || !customerData || tailorError || !tailorData) {
     return NextResponse.json(
       { error: "Failed to fetch user details" },
@@ -120,8 +97,6 @@ export async function GET(
       bio: tailorDetailsData?.bio || null,
       rating: tailorDetailsData?.rating || 0,
     },
-    design,
-    user_design: userDesign,
   };
 
   return NextResponse.json({ order: enrichedOrder });
