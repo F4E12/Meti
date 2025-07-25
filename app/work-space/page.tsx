@@ -125,7 +125,7 @@ export default function WorkspacePage() {
 
     try {
       const res = await axios.post(
-        "http://meti-ai-eyhah9gchegrdsdt.eastus-01.azurewebsites.net/api/extract-patch",
+        "http://127.0.0.1:5000/api/extract-patch",
         formData,
         { responseType: "blob" }
       );

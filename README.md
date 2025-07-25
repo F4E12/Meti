@@ -151,7 +151,7 @@ python app.py
 By default, it runs at:
 
 ```
-http://localhost:5000
+http://http://127.0.0.1:5000
 ```
 
 Make sure this backend is running when using the main application, especially for all AI services.
