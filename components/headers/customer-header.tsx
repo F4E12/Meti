@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import {
   User,
   Menu,
-  Search,
   ShoppingBag,
   MessageCircle,
   Palette,
@@ -88,13 +87,6 @@ export default function CustomerHeader() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="rounded-full p-2 relative"
-            >
-              <Search className="h-4 w-4" />
-            </Button>
             <Button
               variant="ghost"
               size="sm"

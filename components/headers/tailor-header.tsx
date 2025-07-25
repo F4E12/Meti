@@ -4,13 +4,11 @@ import { Button } from "@/components/ui/button";
 import {
   User,
   Menu,
-  Search,
   Package,
   MessageCircle,
   Palette,
   X,
   Bell,
-  BarChart3,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -76,41 +74,10 @@ export default function TailorHeader() {
               <span>ORDERS</span>
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-coral group-hover:w-full transition-all duration-300"></span>
             </Link>
-            <Link
-              href="/analytics"
-              className="text-sm font-medium text-foreground hover:text-coral transition-colors relative group flex items-center space-x-1"
-            >
-              <BarChart3 className="h-4 w-4" />
-              <span>ANALYTICS</span>
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-coral group-hover:w-full transition-all duration-300"></span>
-            </Link>
           </nav>
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-3">
-            <Button variant="ghost" size="sm" className="rounded-full p-2">
-              <Search className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="rounded-full p-2 relative"
-            >
-              <Bell className="h-4 w-4" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-coral rounded-full text-xs flex items-center justify-center text-white">
-                5
-              </span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="rounded-full p-2 relative"
-            >
-              <Package className="h-4 w-4" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-coral rounded-full text-xs flex items-center justify-center text-white">
-                7
-              </span>
-            </Button>
             <Link href="/profile">
               <Button variant="ghost" size="sm" className="rounded-full p-2">
                 <User className="h-4 w-4" />
@@ -168,14 +135,6 @@ export default function TailorHeader() {
             >
               <Package className="h-4 w-4" />
               <span>ORDERS</span>
-            </Link>
-            <Link
-              href="/analytics"
-              className="text-sm font-medium text-foreground hover:text-coral transition-colors py-2 flex items-center space-x-2"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <BarChart3 className="h-4 w-4" />
-              <span>ANALYTICS</span>
             </Link>
             <div className="flex items-center justify-between pt-4 border-t border-border/50">
               <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)}>
