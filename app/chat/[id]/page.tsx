@@ -34,11 +34,30 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
+  const [translatedMessages, setTranslatedMessages] = useState<
+    Record<string, string>
+  >({});
+  const [translationError, setTranslationError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
   // Normalize chatId
   const chatId = Array.isArray(id) ? id[0] : id;
+
+  // Supported languages for translation
+  const supportedLanguages = [
+    "Indonesia",
+    "Jawa",
+    "Sunda",
+    "Batak",
+    "Betawi",
+    "Minang",
+    "Bugis",
+    "Madura",
+    "Bali",
+    "English",
+  ];
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -178,7 +197,7 @@ export default function ChatPage() {
             null;
           if (senderData.role === "tailor") {
             const { data, error: senderDetailsError } = await supabase
-              .from("TailorDetails")
+              .from("tailordetails")
               .select("bio, rating")
               .eq("user_id", messageData.sender_id)
               .single();
@@ -263,6 +282,43 @@ export default function ChatPage() {
     }
   };
 
+  // Handle translation request
+  const handleTranslate = async (messageId: string, language: string) => {
+    setTranslationError(null); // Reset error state
+    try {
+      const response = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageId, targetLanguage: language }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.translatedText) {
+        setTranslatedMessages((prev) => ({
+          ...prev,
+          [messageId]: data.translatedText,
+        }));
+      } else if (data.error) {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      console.error("Translation failed:", error);
+      setTranslationError("Failed to translate message");
+    }
+  };
+
+  // Handle showing original message
+  const handleShowOriginal = (messageId: string) => {
+    setTranslatedMessages((prev) => {
+      const newTranslatedMessages = { ...prev };
+      delete newTranslatedMessages[messageId];
+      return newTranslatedMessages;
+    });
+    setSelectedLanguage(null); // Reset selected language
+  };
+
   if (!isLoading && role !== "customer" && role !== "tailor") {
     return null;
   }
@@ -305,32 +361,76 @@ export default function ChatPage() {
                 </p>
               </div>
             ) : (
-              messages.map((message) => (
-                <div
-                  key={message.message_id}
-                  className={`flex ${
-                    message.sender_id === currentUserId
-                      ? "justify-end"
-                      : "justify-start"
-                  } mb-3`}
-                >
-                  <div
-                    className={`max-w-[75%] p-3 rounded-2xl shadow-sm ${
-                      message.sender_id === currentUserId
-                        ? "bg-blue-500 text-white rounded-br-sm"
-                        : "bg-white text-gray-800 rounded-bl-sm"
-                    }`}
-                  >
-                    <p className="text-sm">{message.content}</p>
-                    <p className="text-xs text-gray-400 mt-1 text-right">
-                      {new Date(message.created_at).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
+              <>
+                {translationError && (
+                  <div className="text-red-500 text-sm mb-2">
+                    {translationError}
                   </div>
-                </div>
-              ))
+                )}
+                {messages.map((message) => (
+                  <div
+                    key={message.message_id}
+                    className={`flex ${
+                      message.sender_id === currentUserId
+                        ? "justify-end"
+                        : "justify-start"
+                    } mb-3`}
+                  >
+                    <div
+                      className={`max-w-[75%] p-3 rounded-2xl shadow-sm ${
+                        message.sender_id === currentUserId
+                          ? "bg-blue-500 text-white rounded-br-sm"
+                          : "bg-white text-gray-800 rounded-bl-sm"
+                      }`}
+                    >
+                      <p className="text-sm">
+                        {translatedMessages[message.message_id] ||
+                          message.content}
+                      </p>
+                      {/* Show translation options only for messages from the other user */}
+                      {message.sender_id !== currentUserId && (
+                        <div className="mt-2">
+                          <select
+                            value={selectedLanguage || ""}
+                            onChange={(e) => {
+                              const lang = e.target.value;
+                              setSelectedLanguage(lang);
+                              if (lang)
+                                handleTranslate(message.message_id, lang);
+                            }}
+                            className="p-1 text-sm border rounded"
+                          >
+                            <option value="">Translate to...</option>
+                            {supportedLanguages.map((lang) => (
+                              <option key={lang} value={lang}>
+                                {lang}
+                              </option>
+                            ))}
+                          </select>
+                          {translatedMessages[message.message_id] && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="ml-2 text-xs text-blue-500 hover:text-blue-700"
+                              onClick={() =>
+                                handleShowOriginal(message.message_id)
+                              }
+                            >
+                              Show Original
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                      <p className="text-xs text-gray-400 mt-1 text-right">
+                        {new Date(message.created_at).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </>
             )}
             <div ref={messagesEndRef} />
           </div>

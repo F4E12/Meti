@@ -47,8 +47,8 @@ export async function GET(
   const supabase = createClient();
   const chatId = params.id;
 
-  console.log("Params:", params);
-  console.log("Chat ID:", chatId);
+  // console.log("Params:", params);
+  // console.log("Chat ID:", chatId);
 
   // Validate chatId
   if (!chatId || chatId === "undefined") {
@@ -154,7 +154,7 @@ export async function GET(
   let customerDetails: { bio: string | null; rating: number } | null = null;
   if (customerData.role === "tailor") {
     const { data, error: customerDetailsError } = await (await supabase)
-      .from("TailorDetails")
+      .from("tailordetails")
       .select("bio, rating")
       .eq("user_id", chatData.user_id)
       .single();
@@ -211,7 +211,7 @@ export async function GET(
   const { data: tailorDetails, error: tailorDetailsError } = await (
     await supabase
   )
-    .from("TailorDetails")
+    .from("tailordetails")
     .select("bio, rating")
     .eq("user_id", chatData.tailor_id)
     .single();
@@ -305,7 +305,7 @@ export async function GET(
   }[] = [];
   if (senderTailorIds.length > 0) {
     const { data, error: sendersTailorError } = await (await supabase)
-      .from("TailorDetails")
+      .from("tailordetails")
       .select("user_id, bio, rating")
       .in("user_id", senderTailorIds);
 

@@ -187,7 +187,7 @@ export default function ChatListPage() {
             // Fetch customer TailorDetails
             const { data: customerDetails, error: customerDetailsError } =
               await supabase
-                .from("TailorDetails")
+                .from("tailordetails")
                 .select("bio, rating")
                 .eq("user_id", chatData.user_id)
                 .single();
@@ -235,7 +235,7 @@ export default function ChatListPage() {
             // Fetch tailor TailorDetails
             const { data: tailorDetails, error: tailorDetailsError } =
               await supabase
-                .from("TailorDetails")
+                .from("tailordetails")
                 .select("bio, rating")
                 .eq("user_id", chatData.tailor_id)
                 .single();
