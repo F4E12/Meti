@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState, useCallback } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
@@ -17,7 +17,7 @@ const ThreeShirtViewer: React.FC<ThreeShirtViewerProps> = ({
   combinedTextureFromCanvas,
 }) => {
   const threeJsWrapperRef = useRef<HTMLDivElement>(null);
-  const textureInputRef = useRef<HTMLInputElement>(null);
+  // const textureInputRef = useRef<HTMLInputElement>(null);
 
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -201,74 +201,74 @@ const ThreeShirtViewer: React.FC<ThreeShirtViewerProps> = ({
     }
   }, [combinedTextureFromCanvas, modelRef.current]);
 
-  const handleTextureUpload = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (!file) return;
+  // const handleTextureUpload = useCallback(
+  //   (event: React.ChangeEvent<HTMLInputElement>) => {
+  //     const file = event.target.files?.[0];
+  //     if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const image = new Image();
-        image.onload = () => {
-          const uploadedTexture = new THREE.Texture(image);
-          uploadedTexture.flipY = false;
-          uploadedTexture.wrapS = THREE.RepeatWrapping;
-          uploadedTexture.wrapT = THREE.RepeatWrapping;
-          uploadedTexture.needsUpdate = true;
+  //     const reader = new FileReader();
+  //     reader.onload = (e) => {
+  //       const image = new Image();
+  //       image.onload = () => {
+  //         const uploadedTexture = new THREE.Texture(image);
+  //         uploadedTexture.flipY = false;
+  //         uploadedTexture.wrapS = THREE.RepeatWrapping;
+  //         uploadedTexture.wrapT = THREE.RepeatWrapping;
+  //         uploadedTexture.needsUpdate = true;
 
-          sceneRef.current?.traverse((child) => {
-            if (child instanceof THREE.Mesh && child.material) {
-              if (currentTexture && currentTexture !== uploadedTexture) {
-                currentTexture.dispose();
-              }
+  //         sceneRef.current?.traverse((child) => {
+  //           if (child instanceof THREE.Mesh && child.material) {
+  //             if (currentTexture && currentTexture !== uploadedTexture) {
+  //               currentTexture.dispose();
+  //             }
 
-              if (child.material instanceof THREE.MeshStandardMaterial) {
-                child.material.map = uploadedTexture;
-                child.material.needsUpdate = true;
-              } else {
-                const oldMaterial = child.material;
-                child.material = new THREE.MeshStandardMaterial({
-                  map: uploadedTexture,
-                  side: THREE.DoubleSide,
-                });
-                oldMaterial.dispose();
-              }
-            }
-          });
-          setCurrentTexture(uploadedTexture);
-          rendererRef.current?.render(sceneRef.current!, cameraRef.current!);
-        };
-        image.src = e.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-    },
-    [currentTexture]
-  );
+  //             if (child.material instanceof THREE.MeshStandardMaterial) {
+  //               child.material.map = uploadedTexture;
+  //               child.material.needsUpdate = true;
+  //             } else {
+  //               const oldMaterial = child.material;
+  //               child.material = new THREE.MeshStandardMaterial({
+  //                 map: uploadedTexture,
+  //                 side: THREE.DoubleSide,
+  //               });
+  //               oldMaterial.dispose();
+  //             }
+  //           }
+  //         });
+  //         setCurrentTexture(uploadedTexture);
+  //         rendererRef.current?.render(sceneRef.current!, cameraRef.current!);
+  //       };
+  //       image.src = e.target?.result as string;
+  //     };
+  //     reader.readAsDataURL(file);
+  //   },
+  //   [currentTexture]
+  // );
 
-  const handleRemoveTexture = useCallback(() => {
-    sceneRef.current?.traverse((child) => {
-      if (child instanceof THREE.Mesh && child.material) {
-        if (child.material instanceof THREE.MeshStandardMaterial) {
-          if (child.material.map) {
-            child.material.map.dispose();
-            child.material.map = null;
-            child.material.needsUpdate = true;
-          }
-        } else {
-          if (child.material.map) {
-            child.material.map.dispose();
-            child.material.map = null;
-            child.material.needsUpdate = true;
-          }
-        }
-      }
-    });
-    if (currentTexture) {
-      currentTexture.dispose();
-      setCurrentTexture(null);
-    }
-    rendererRef.current?.render(sceneRef.current!, cameraRef.current!);
-  }, [currentTexture]);
+  // const handleRemoveTexture = useCallback(() => {
+  //   sceneRef.current?.traverse((child) => {
+  //     if (child instanceof THREE.Mesh && child.material) {
+  //       if (child.material instanceof THREE.MeshStandardMaterial) {
+  //         if (child.material.map) {
+  //           child.material.map.dispose();
+  //           child.material.map = null;
+  //           child.material.needsUpdate = true;
+  //         }
+  //       } else {
+  //         if (child.material.map) {
+  //           child.material.map.dispose();
+  //           child.material.map = null;
+  //           child.material.needsUpdate = true;
+  //         }
+  //       }
+  //     }
+  //   });
+  //   if (currentTexture) {
+  //     currentTexture.dispose();
+  //     setCurrentTexture(null);
+  //   }
+  //   rendererRef.current?.render(sceneRef.current!, cameraRef.current!);
+  // }, [currentTexture]);
 
   return (
     <div>

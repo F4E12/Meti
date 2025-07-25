@@ -241,34 +241,48 @@ export default function WorkspacePage() {
 
         {/* Current Designs Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {currentDesigns.map((design) => (
-            <div
-              key={design.id}
-              className={`aspect-[4/5] ${design.color} rounded-2xl relative overflow-hidden group cursor-pointer hover:scale-105 transition-transform duration-300`}
-            >
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
-              <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <h3 className="text-white font-semibold text-sm mb-2">
-                  {design.name}
-                </h3>
-                <div className="flex flex-wrap gap-1">
-                  {design.tags.slice(0, 2).map((tag) => (
-                    <span
-                      key={tag}
-                      className="bg-white/20 text-white text-xs px-2 py-1 rounded-full"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                  {design.tags.length > 2 && (
-                    <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-full">
-                      +{design.tags.length - 2}
-                    </span>
-                  )}
+          {currentDesigns.map((design, index) => {
+            const imageUrls = [
+              "https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/batik_creations/Firefly_generate%20Batik%20buttoned%20up%20shirt%20put%20on%20a%20manequin%20no%20head,%20in%20the%20color%20of%20brown,%20wh%20122594.jpg",
+              "https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/batik_creations/Firefly_generate%20Batik%20buttoned%20up%20shirt%20put%20on%20a%20manequin%20no%20head,%20in%20the%20color%20of%20dark%20blue%20122594.jpg",
+              "https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/batik_creations/Firefly_generate%20Batik%20lots%20of%20motif%20%20buttoned%20up%20shirt%20put%20on%20a%20manequin%20no%20head,%20in%20the%20col%20102797.jpg",
+            ];
+            const imageUrl = imageUrls[index % imageUrls.length]; // Cycle through images if more designs than images
+
+            return (
+              <div
+                key={design.id}
+                className="aspect-[4/5] rounded-2xl relative overflow-hidden group cursor-pointer hover:scale-105 transition-transform duration-300"
+              >
+                <img
+                  src={imageUrl}
+                  alt={design.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
+                <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <h3 className="text-white font-semibold text-sm mb-2">
+                    {design.name}
+                  </h3>
+                  <div className="flex flex-wrap gap-1">
+                    {design.tags.slice(0, 2).map((tag) => (
+                      <span
+                        key={tag}
+                        className="bg-white/20 text-white text-xs px-2 py-1 rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                    {design.tags.length > 2 && (
+                      <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-full">
+                        +{design.tags.length - 2}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
