@@ -345,17 +345,19 @@ export default function HomePage() {
                 name: "Parang Rusak Modern",
                 tailor: "Pak Suharto, Yogyakarta",
                 price: "Rp 850.000",
-                image: "/assets/dummy_batik_1.jpg",
+                url: "https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/batik_creations/Firefly_generate%20Batik%20buttoned%20up%20shirt%20put%20on%20a%20manequin%20no%20head,%20in%20the%20color%20of%20brown,%20wh%20122594.jpg",
               },
               {
                 name: "Kawung Contemporary",
                 tailor: "Bu Sari, Solo",
                 price: "Rp 750.000",
+                url: "https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/batik_creations/Firefly_generate%20Batik%20buttoned%20up%20shirt%20put%20on%20a%20manequin%20no%20head,%20in%20the%20color%20of%20dark%20blue%20122594.jpg",
               },
               {
                 name: "Mega Mendung Fusion",
                 tailor: "Pak Budi, Cirebon",
                 price: "Rp 920.000",
+                url: "https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/batik_creations/Firefly_generate%20Batik%20lots%20of%20motif%20%20buttoned%20up%20shirt%20put%20on%20a%20manequin%20no%20head,%20in%20the%20col%20102797.jpg",
               },
             ].map((item, index) => (
               <div
@@ -365,7 +367,7 @@ export default function HomePage() {
               >
                 <div className="aspect-[3/4] bg-white mb-4 relative overflow-hidden rounded-lg border">
                   <img
-                    src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/dummy/dummy_tailor.jpg"
+                    src={item.url}
                     alt={item.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
@@ -454,7 +456,7 @@ export default function HomePage() {
             <div className="grid grid-cols-2 gap-6 intersection-fade">
               <div className="aspect-square relative overflow-hidden rounded-lg hover-lift">
                 <img
-                  src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/dummy/dummy_tailor.jpg"
+                  src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/tailors/featured_2.jpg"
                   alt="Indonesian tailor at work"
                   className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                 />
@@ -462,7 +464,7 @@ export default function HomePage() {
               </div>
               <div className="aspect-square relative overflow-hidden rounded-lg hover-lift">
                 <img
-                  src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/dummy/dummy_tailor.jpg"
+                  src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/tailors/featured_3.jpg"
                   alt="Traditional batik making"
                   className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                 />
@@ -490,7 +492,7 @@ export default function HomePage() {
             <div className="grid grid-cols-2 gap-6 intersection-fade">
               <div className="aspect-square relative overflow-hidden rounded-lg hover-lift">
                 <img
-                  src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/dummy/dummy_tailor.jpg"
+                  src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/preserve/Firefly_generate%20Batik%20buttoned%20up%20shirt%20put%20on%20a%20manequin%20no%20head,%20in%20the%20color%20of%20dark%20blue%20620045.jpg"
                   alt="Traditional batik patterns"
                   className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                 />
