@@ -1,12 +1,22 @@
 # 🧵 Meti - Personalized Batik Tailoring Platform
 
-Meti is a full-stack web application that allows customers to design their own Batik T-shirts, connect with tailors, and place custom orders with precision body measurements. The app combines creative tools with AI-assisted tailoring to make fashion more personal, local, and interactive.
+<p align="start">
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/dummy/LOGO_text.png" width="300" alt="Logo" />
+</p>
+
+**Meti** is a full-stack web application that allows customers to design their own cultural apparel, connect with talented local tailors, and place custom orders with precise body measurements. By combining AI-powered tailoring and 3D design tools, Meti makes fashion more personal, local, and interactive.
 
 ---
 
-## 🌐 Live Demo
+## 🌐 Short Demo
 
 > Coming Soon...
+
+---
+
+## 📖 Pitch Deck
+
+> https://drive.google.com/file/d/14AwfeVlTbTeeQanCUPGCR3ZfA8tOH-rL/view?usp=sharing
 
 ---
 
@@ -14,8 +24,10 @@ Meti is a full-stack web application that allows customers to design their own B
 
 - **Frontend**: [Next.js](https://nextjs.org/), [Tailwind CSS](https://tailwindcss.com/)
 - **Backend**: [Supabase](https://supabase.com/), [Azure OpenAI](https://azure.microsoft.com/en-us/products/ai-services/openai-service/)
-- **AI/ML**: Pose Landmark Detection using [MediaPipe](https://developers.google.com/mediapipe)
-- **Scripting**: Python for body measurement logic and processing
+- **AI/ML**:
+  - [MediaPipe Pose Landmark](https://developers.google.com/mediapipe) for body measurement detection
+  - Python backend for AI measurement and pattern extraction
+- **3D Sandbox**: [Three.js](https://threejs.org/), HTML Canvas
 
 ---
 
@@ -23,65 +35,122 @@ Meti is a full-stack web application that allows customers to design their own B
 
 ### 🧵 3D Design
 
-- Sandbox to design custom Batik T-shirts
-- Interactive Batik pattern editor
-- Extract colors from uploaded images and allow users to customize the color palette
+<p align="center">
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/2025-07-25%2019-24-09.gif" alt="3D Sandbox" width="70%" />
+</p>
 
-### 🔐 Auth
+- Interactive sandbox to design custom apparel
+- Custom Batik pattern editor using **Three.js** and **HTML Canvas**
+- Extract dominant colors from uploaded images and customize palette
+- **Computer Vision** detects and modifies Batik pattern colors dynamically
 
-- Secure user authentication (Login/Register)
+---
 
-### 💬 Chat
+### 🔐 Authentication
+
+<p float="left">
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/login.jpg" height="300" />
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/register.jpg" height="300" />
+</p>
+
+- Secure user login and registration
+- Integrated with Supabase Auth
+
+---
+
+### 💬 Real-Time Chat with Translation
+
+<p align="center">
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/translate_chat.gif" width="70%" />
+</p>
 
 - Real-time communication between customers and tailors
-- AI-powered translation support for various regional languages in Indonesia
+- Built-in translation powered by **Azure OpenAI** for multilingual conversations (supports Indonesian dialects)
+
+---
 
 ### 🌟 Featured Weavers
 
-- Browse and choose Batik designs from local weavers
-- Start custom T-shirt design from selected patterns
+<p align="center">
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/2025-07-25%2019-50-50.gif" width="70%" />
+</p>
 
-### 📏 Measure
+- Browse unique Batik patterns from local weavers
+- Select patterns to start designing custom T-shirts
 
-- AI-based body measurement using camera (MediaPipe Pose Landmark)
-- Measurements include:
+---
 
+### 📏 AI Body Measurement
+
+<p align="center">
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/2025-07-25%2019-28-56.gif" width="70%" />
+</p>
+
+- AI-assisted body measurement using **MediaPipe Pose Landmark Detection**
+- Requires an object reference (e.g., a 500 Rupiah coin)
+- Measurements extracted:
   - Right Arm Length
   - Left Arm Length
   - Shoulder Width
   - Upper Body Height
   - Hip Width
 
+---
+
 ### 📦 Orders
 
-- Place orders for custom-designed shirts
-- Track order status
+<p align="center">
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/order.gif" width="70%" />
+</p>
 
-### 🛍️ Product
+- Place and manage custom clothing orders
+- View real-time order status
 
-- View detailed Batik products available for direct purchase
+---
 
-### 👤 Profile
+### 👤 User Profile
 
-- User profile with editable info
+<p align="center">
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/pofile.jpg" height="300" />
+</p>
 
-### 🧵 Tailors
+- Manage user information
+- Editable profile fields
 
-- List of available tailors
-- Chat and collaborate with tailors
+---
 
-### 🛠️ Workspace (for Tailors)
+### 🧵 Tailors Directory
 
-- Tailor dashboard to manage orders and designs
-- Add new orders and communicate with customers
-- AI that can extract Batik patterns from photos of people wearing Batik and generate editable design templates
+<p align="center">
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/tailors.gif" width="70%" />
+</p>
+
+- View list of available tailors
+- Direct messaging and collaboration with tailors
+
+---
+
+### 🛠️ Tailor Workspace
+
+<p align="center">
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/2025-07-25%2019-38-29.gif" width="70%" />
+</p>
+
+- Tailor dashboard to manage customer designs and orders
+- AI-powered Batik pattern extraction from photos
+- Convert extracted Batik into editable vector-style design templates
+
+---
 
 ### 🏠 Homepage
 
-- Introduction to **Meti**
-- Highlighted weavers
-- Batik shirt design gallery
-- Promotions & local artisan spotlight
+<p align="center">
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/home.jpg" height="300" />
+</p>
+
+- Introduction to Meti
+- Featured weavers & community highlights
+- Batik gallery & promo banners
 
 ---
 
