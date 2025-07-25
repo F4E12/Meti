@@ -1,6 +1,7 @@
 "use client";
 
-import { User, Heart } from "lucide-react";
+import Header from "@/components/headers/header";
+import { Heart } from "lucide-react";
 import { useState } from "react";
 
 export default function FeaturedWeaversPage() {
@@ -52,22 +53,6 @@ export default function FeaturedWeaversPage() {
     "border-meti-pink",
     "border-meti-orange",
     "border-meti-teal",
-  ];
-
-  // Circle colors matching borders
-  const circleColors = [
-    "bg-meti-pink",
-    "bg-meti-orange",
-    "bg-meti-teal",
-    "bg-meti-pink",
-    "bg-meti-teal",
-    "bg-meti-orange",
-    "bg-meti-pink",
-    "bg-meti-teal",
-    "bg-meti-orange",
-    "bg-meti-pink",
-    "bg-meti-orange",
-    "bg-meti-teal",
   ];
 
   // New designs data - using different sizes for masonry layout
@@ -161,47 +146,7 @@ export default function FeaturedWeaversPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <nav className="flex items-center justify-between px-12 py-6 max-w-7xl mx-auto">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-meti-pink rounded flex items-center justify-center">
-              <span className="text-white font-bold text-lg">M</span>
-            </div>
-            <span className="text-meti-dark font-bold text-2xl">METI</span>
-          </div>
-
-          <div className="hidden md:flex items-center space-x-12 text-meti-dark text-sm font-medium">
-            <a href="#" className="hover:text-meti-teal transition-colors">
-              SHOP
-            </a>
-            <a href="#" className="hover:text-meti-teal transition-colors">
-              ABOUT
-            </a>
-            <a href="#" className="hover:text-meti-teal transition-colors">
-              MEASURE
-            </a>
-            <a href="#" className="hover:text-meti-teal transition-colors">
-              DESIGN
-            </a>
-            <a href="#" className="hover:text-meti-teal transition-colors">
-              ASK
-            </a>
-          </div>
-
-          <div className="flex items-center space-x-6">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="search"
-                className="bg-gray-100 text-meti-dark placeholder-meti-dark/50 px-4 py-2 rounded-full text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-meti-teal/20 transition-colors w-32"
-              />
-            </div>
-            <div className="w-10 h-10 bg-meti-teal rounded-full flex items-center justify-center">
-              <User className="w-5 h-5 text-white" />
-            </div>
-          </div>
-        </nav>
-      </header>
+      <Header />
 
       <div className="max-w-7xl mx-auto px-12 py-16 relative">
         {/* Decorative pink background element */}
@@ -343,61 +288,6 @@ export default function FeaturedWeaversPage() {
           </div>
         </section>
       </div>
-
-      {/* Footer */}
-      <footer className="bg-meti-teal text-white mt-20">
-        <div className="max-w-7xl mx-auto px-12 py-12">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="font-semibold mb-4">Office</h3>
-              <div className="space-y-2 text-sm text-white/90">
-                <p>asisted@meti.co.id</p>
-                <p>+6292-382-903</p>
-                <p>
-                  RAGUNAN, Singapura, Garut Regency, West Java 44173, Indonesia
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-4">Featured Weavers</h3>
-              <ul className="space-y-2 text-sm text-white/90">
-                <li>Master Weaver Sari</li>
-                <li>Artisan Budi</li>
-                <li>Craftsman Adi</li>
-                <li>Heritage Collective</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-4">Categories</h3>
-              <ul className="space-y-2 text-sm text-white/90">
-                <li>Traditional Batik</li>
-                <li>Ikat Weaving</li>
-                <li>Songket Fabric</li>
-                <li>Contemporary Designs</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-4">Support</h3>
-              <ul className="space-y-2 text-sm text-white/90">
-                <li>Size Guide</li>
-                <li>Care Instructions</li>
-                <li>Returns & Exchanges</li>
-                <li>Contact Us</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-white/20 pt-8 mt-8 text-center">
-            <p className="text-sm text-white/90">
-              © 2024 METI. Preserving traditional craftsmanship through
-              contemporary fashion.
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

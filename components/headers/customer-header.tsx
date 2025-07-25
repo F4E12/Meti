@@ -56,7 +56,7 @@ export default function CustomerHeader() {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-teal-500 to-pink-500 group-hover:w-full transition-all duration-300 ease-out"></span>
             </Link>
             <Link
-              href="/shop"
+              href="/featured-weavers"
               className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-all duration-300 relative group flex items-center space-x-1 py-2"
             >
               <ShoppingBag className="h-4 w-4 group-hover:scale-110 transition-transform duration-300" />
@@ -145,7 +145,7 @@ export default function CustomerHeader() {
               HOME
             </Link>
             <Link
-              href="/shop"
+              href="/featured-weavers"
               className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-all duration-300 py-2 flex items-center space-x-2 hover:translate-x-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
