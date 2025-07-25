@@ -55,7 +55,10 @@ const ColorChanger: React.FC<ColorChangerProps> = ({ pattern, setPattern }) => {
     formData.append("image", file);
 
     try {
-      const res = await axios.post("http://localhost:5000/upload", formData);
+      const res = await axios.post(
+        "http://meti-ai-eyhah9gchegrdsdt.eastus-01.azurewebsites.net/upload",
+        formData
+      );
       if (!res.data.colors || !res.data.image_id) {
         throw new Error("Invalid response from /upload endpoint");
       }
@@ -73,7 +76,7 @@ const ColorChanger: React.FC<ColorChangerProps> = ({ pattern, setPattern }) => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/recolor",
+        "http://meti-ai-eyhah9gchegrdsdt.eastus-01.azurewebsites.net/recolor",
         {
           image_id: imageId,
           color_map: newColors,
