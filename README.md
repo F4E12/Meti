@@ -10,7 +10,11 @@
 
 ## 🌐 Short Demo
 
-> Coming Soon...
+> https://youtu.be/ShYTD1M3whM
+
+<a href="https://youtu.be/ShYTD1M3whM">
+  <img src="https://img.youtube.com/vi/ShYTD1M3whM/0.jpg" alt="Short Demo" width="560" height="315" />
+</a>
 
 ---
 
@@ -61,7 +65,7 @@
 ### 💬 Real-Time Chat with Translation
 
 <p align="center">
-  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/translate_chat.gif" alt="Real-Time Chat" width="70%" />
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/2025-07-25%2020-17-39.gif" alt="Real-Time Chat" width="70%" />
 </p>
 
 - Real-time communication between customers and tailors
@@ -72,7 +76,7 @@
 ### 🌟 Featured Weavers
 
 <p align="center">
-  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/2025-07-25%2019-50-50.gif" alt="Featured Weavers" width="70%" />
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/fw.jpg" alt="Featured Weavers" width="70%" />
 </p>
 
 - Browse unique Batik patterns from local weavers
@@ -100,7 +104,8 @@
 ### 📦 Orders
 
 <p align="center">
-  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/order.gif" alt="Orders" width="70%" />
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/all_orders.jpg" alt="Orders" width="70%" />
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/order_details.jpg" alt="Orders" width="70%" />
 </p>
 
 - Place and manage custom clothing orders
@@ -111,7 +116,7 @@
 ### 👤 User Profile
 
 <p align="center">
-  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/pofile.jpg" alt="User Profile" height="300" />
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/pofile.jpg" alt="User Profile" width="70%" />
 </p>
 
 - Manage user information
@@ -119,10 +124,10 @@
 
 ---
 
-### 🧵 Tailors Directory
+### 🧵 Tailors
 
 <p align="center">
-  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/tailors.gif" alt="Tailors Directory" width="70%" />
+  <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/github_gif/tailors_img.jpg" alt="Tailors Directory" width="70%" />
 </p>
 
 - View list of available tailors
