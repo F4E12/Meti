@@ -10,6 +10,7 @@ import {
   X,
   Scissors,
   Bookmark,
+  Package,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -24,19 +25,19 @@ export default function CustomerHeader() {
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           {/* Logo */}
           <Link href="/" className="flex items-center group gap-2">
-            <div className="">
+            <div>
               <Image
                 src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/dummy/LOGO.svg"
                 width={24}
                 height={24}
-                alt=""
+                alt="METI Logo"
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-2xl font-serif font-bold text-white/90 leading-none">
+              <span className="text-2xl font-serif font-bold text-foreground leading-none">
                 METI
               </span>
-              <span className="text-xs text-muted-foreground font-medium tracking-wide">
+              <span className="text-xs text-muted-foreground font-sans font-medium tracking-wide">
                 HERITAGE CRAFT
               </span>
             </div>
@@ -46,14 +47,14 @@ export default function CustomerHeader() {
           <nav className="hidden lg:flex items-center space-x-8">
             <Link
               href="/"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors relative group"
+              className="text-sm font-sans font-medium text-foreground hover:text-primary transition-colors relative group"
             >
               HOME
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
               href="/shop"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors relative group flex items-center space-x-1"
+              className="text-sm font-sans font-medium text-foreground hover:text-primary transition-colors relative group flex items-center space-x-1"
             >
               <ShoppingBag className="h-4 w-4" />
               <span>SHOP</span>
@@ -61,15 +62,23 @@ export default function CustomerHeader() {
             </Link>
             <Link
               href="/design"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors relative group flex items-center space-x-1"
+              className="text-sm font-sans font-medium text-foreground hover:text-primary transition-colors relative group flex items-center space-x-1"
             >
               <Palette className="h-4 w-4" />
               <span>DESIGN</span>
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
+              href="/orders"
+              className="text-sm font-sans font-medium text-foreground hover:text-primary transition-colors relative group flex items-center space-x-1"
+            >
+              <Package className="h-4 w-4" />
+              <span>ORDERS</span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+            </Link>
+            <Link
               href="/chat"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors relative group flex items-center space-x-1"
+              className="text-sm font-sans font-medium text-foreground hover:text-primary transition-colors relative group flex items-center space-x-1"
             >
               <MessageCircle className="h-4 w-4" />
               <span>CHAT</span>
@@ -77,7 +86,7 @@ export default function CustomerHeader() {
             </Link>
             <Link
               href="/tailors"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors relative group flex items-center space-x-1"
+              className="text-sm font-sans font-medium text-foreground hover:text-primary transition-colors relative group flex items-center space-x-1"
             >
               <Scissors className="h-4 w-4" />
               <span>TAILORS</span>
@@ -123,14 +132,14 @@ export default function CustomerHeader() {
           <nav className="flex flex-col space-y-4">
             <Link
               href="/"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2"
+              className="text-sm font-sans font-medium text-foreground hover:text-primary transition-colors py-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               HOME
             </Link>
             <Link
               href="/shop"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2 flex items-center space-x-2"
+              className="text-sm font-sans font-medium text-foreground hover:text-primary transition-colors py-2 flex items-center space-x-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <ShoppingBag className="h-4 w-4" />
@@ -138,15 +147,23 @@ export default function CustomerHeader() {
             </Link>
             <Link
               href="/design"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2 flex items-center space-x-2"
+              className="text-sm font-sans font-medium text-foreground hover:text-primary transition-colors py-2 flex items-center space-x-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <Palette className="h-4 w-4" />
               <span>DESIGN</span>
             </Link>
             <Link
+              href="/orders"
+              className="text-sm font-sans font-medium text-foreground hover:text-primary transition-colors py-2 flex items-center space-x-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <Package className="h-4 w-4" />
+              <span>ORDERS</span>
+            </Link>
+            <Link
               href="/chat"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2 flex items-center space-x-2"
+              className="text-sm font-sans font-medium text-foreground hover:text-primary transition-colors py-2 flex items-center space-x-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <MessageCircle className="h-4 w-4" />
@@ -154,7 +171,7 @@ export default function CustomerHeader() {
             </Link>
             <Link
               href="/tailors"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2 flex items-center space-x-2"
+              className="text-sm font-sans font-medium text-foreground hover:text-primary transition-colors py-2 flex items-center space-x-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <Scissors className="h-4 w-4" />
@@ -162,7 +179,11 @@ export default function CustomerHeader() {
             </Link>
             <div className="flex items-center justify-between pt-4 border-t border-border/50">
               <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button variant="ghost" size="sm" className="rounded-full">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-full font-sans"
+                >
                   <User className="h-4 w-4 mr-2" />
                   PROFILE
                 </Button>
