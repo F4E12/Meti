@@ -18,6 +18,9 @@ from mediapipe.tasks.python import vision
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+from PIL import Image
+import base64
+import io
 
 app = Flask(__name__)
 CORS(app)
@@ -334,6 +337,73 @@ def handle_extract_shirt_patch():
         'patch_image_url': patch_url,
         'debug_image_url': debug_url
     })
+
+@app.route('/composite_images', methods=['POST'])
+def composite_images():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No JSON data received"}), 400
+
+    images_data = data.get('images')
+    final_width = data.get('final_width', 1024)
+    final_height = data.get('final_height', 1024)
+
+    if not images_data:
+        return jsonify({"error": "No 'images' array found in data"}), 400
+
+    try:
+        final_image = Image.new('RGBA', (int(final_width), int(final_height)), (255, 255, 255, 255))
+
+        for img_info in images_data:
+            base64_img = img_info.get('imageData')
+            x = int(img_info.get('x', 0))
+            y = int(img_info.get('y', 0))
+
+            if not base64_img:
+                print(f"Warning: Missing imageData for an entry at x={x}, y={y}")
+                continue
+
+            img_bytes = base64.b64decode(base64_img)
+            img_part = Image.open(io.BytesIO(img_bytes))
+
+            if img_part.mode != 'RGBA':
+                img_part = img_part.convert('RGBA')
+
+            final_image.paste(img_part, (x, y), img_part)
+
+        buffer = io.BytesIO()
+        final_image.save(buffer, format="PNG")
+        final_image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+        return jsonify({
+            "message": "Images composited successfully!",
+            "final_image_base64": final_image_base64
+        }), 200
+
+    except Exception as e:
+        print(f"Error processing images: {e}")
+        return jsonify({"error": str(e)}), 500
+    
+@app.route("/tile-pattern", methods=["POST"])
+def tile_pattern():
+    pattern_file = request.files.get("pattern")
+    if not pattern_file:
+        return jsonify({"error": "No pattern provided"}), 400
+
+    tile = Image.open(pattern_file.stream).convert("RGB")
+    tile_width, tile_height = tile.size
+    canvas_width, canvas_height = 1500, 2000
+
+    tiled = Image.new("RGB", (canvas_width, canvas_height), color=(255, 255, 255))
+    for x in range(0, canvas_width, tile_width):
+        for y in range(0, canvas_height, tile_height):
+            tiled.paste(tile, (x, y))
+
+    buffer = io.BytesIO()
+    tiled.save(buffer, format="PNG")
+    buffer.seek(0)
+    return send_file(buffer, mimetype="image/png", as_attachment=False, download_name="tiled.png")
+
 
 # Run the Flask app
 if __name__ == "__main__":

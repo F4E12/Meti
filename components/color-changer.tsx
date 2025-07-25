@@ -18,18 +18,27 @@ const ColorChanger: React.FC<ColorChangerProps> = ({ pattern, setPattern }) => {
 
   // Convert base64 pattern to File and trigger color detection when pattern changes
   useEffect(() => {
-    if (pattern) {
-      const byteString = atob(pattern.split(",")[1]);
-      const mimeString = pattern.split(",")[0].split(":")[1].split(";")[0];
-      const ab = new ArrayBuffer(byteString.length);
-      const ia = new Uint8Array(ab);
-      for (let i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
+    if (pattern && pattern.startsWith("data:image/")) {
+      try {
+        const base64String = pattern.split(",")[1];
+        if (!base64String) {
+          console.error("Invalid base64 string: missing data after comma");
+          return;
+        }
+        const byteString = atob(base64String);
+        const mimeString = pattern.split(",")[0].split(":")[1].split(";")[0];
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([ab], { type: mimeString });
+        const file = new File([blob], "pattern.png", { type: mimeString });
+        setImage(file);
+        handleUpload(file);
+      } catch (error) {
+        console.error("Error converting pattern to File:", error);
       }
-      const blob = new Blob([ab], { type: mimeString });
-      const file = new File([blob], "pattern.png", { type: mimeString });
-      setImage(file);
-      handleUpload(file); // Automatically detect colors
     } else {
       setImage(null);
       setColors([]);
@@ -47,6 +56,9 @@ const ColorChanger: React.FC<ColorChangerProps> = ({ pattern, setPattern }) => {
 
     try {
       const res = await axios.post("http://localhost:5000/upload", formData);
+      if (!res.data.colors || !res.data.image_id) {
+        throw new Error("Invalid response from /upload endpoint");
+      }
       setColors(res.data.colors);
       setNewColors(res.data.colors);
       setImageId(res.data.image_id);
@@ -69,9 +81,15 @@ const ColorChanger: React.FC<ColorChangerProps> = ({ pattern, setPattern }) => {
         { responseType: "blob" }
       );
 
-      const url = URL.createObjectURL(res.data);
+      const blob = res.data;
+      const url = URL.createObjectURL(blob);
       setResultUrl(url);
-      setPattern(url); // Update the pattern state with the recolored image
+      setPattern(url);
+
+      // Convert the recolored blob to a File and re-detect colors
+      const file = new File([blob], "recolored.png", { type: blob.type });
+      setImage(file);
+      await handleUpload(file);
     } catch (error) {
       console.error("Error recoloring image:", error);
       alert("Failed to apply color changes.");
