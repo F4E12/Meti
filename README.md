@@ -44,6 +44,8 @@ Meti is a full-stack web application that allows customers to design their own B
 ### 📏 Measure
 
 - AI-based body measurement using camera (MediaPipe Pose Landmark)
+- Note: You will need an object reference (500 rupiah coins)
+- Note: The /measure page is not working properlly, you can try the measurement in /tets/body-measurement
 - Measurements include:
 
   - Right Arm Length
