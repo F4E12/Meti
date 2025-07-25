@@ -46,10 +46,7 @@ const ColorChanger: React.FC<ColorChangerProps> = ({ pattern, setPattern }) => {
     formData.append("image", file);
 
     try {
-      const res = await axios.post(
-        "http://meti-ai-eyhah9gchegrdsdt.eastus-01.azurewebsites.net/upload",
-        formData
-      );
+      const res = await axios.post("http://127.0.0.1:5000/upload", formData);
       setColors(res.data.colors);
       setNewColors(res.data.colors);
       setImageId(res.data.image_id);
@@ -64,7 +61,7 @@ const ColorChanger: React.FC<ColorChangerProps> = ({ pattern, setPattern }) => {
 
     try {
       const res = await axios.post(
-        "http://meti-ai-eyhah9gchegrdsdt.eastus-01.azurewebsites.net/recolor",
+        "http://127.0.0.1:5000/recolor",
         {
           image_id: imageId,
           color_map: newColors,
