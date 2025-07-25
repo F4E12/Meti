@@ -24,19 +24,19 @@ export default function TailorHeader() {
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           {/* Logo */}
           <Link href="/" className="flex items-center group gap-2">
-            <div className="">
+            <div>
               <Image
                 src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/dummy/LOGO.svg"
                 width={24}
                 height={24}
-                alt=""
+                alt="METI Logo"
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-2xl font-serif font-bold text-white/90 leading-none">
+              <span className="text-2xl font-serif font-bold text-foreground leading-none">
                 METI
               </span>
-              <span className="text-xs text-muted-foreground font-medium tracking-wide">
+              <span className="text-xs text-muted-foreground font-sans font-medium tracking-wide">
                 HERITAGE CRAFT
               </span>
             </div>
@@ -49,7 +49,7 @@ export default function TailorHeader() {
               className="text-sm font-medium text-white hover:text-coral transition-colors relative group"
             >
               HOME
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-coral group-hover:w-full transition-all duration-300"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
               href="/design"
@@ -57,7 +57,7 @@ export default function TailorHeader() {
             >
               <Palette className="h-4 w-4" />
               <span>DESIGN</span>
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-coral group-hover:w-full transition-all duration-300"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
               href="/chat"
@@ -65,7 +65,7 @@ export default function TailorHeader() {
             >
               <MessageCircle className="h-4 w-4" />
               <span>CHAT</span>
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-coral group-hover:w-full transition-all duration-300"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
               href="/orders"
@@ -73,7 +73,7 @@ export default function TailorHeader() {
             >
               <Package className="h-4 w-4" />
               <span>ORDERS</span>
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-coral group-hover:w-full transition-all duration-300"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
               href="/analytics"
@@ -155,7 +155,11 @@ export default function TailorHeader() {
             </Link>
             <div className="flex items-center justify-between pt-4 border-t border-border/50">
               <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button variant="ghost" size="sm" className="rounded-full">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-full font-sans"
+                >
                   <User className="h-4 w-4 mr-2" />
                   PROFILE
                 </Button>
@@ -167,7 +171,7 @@ export default function TailorHeader() {
                   className="rounded-full p-2 relative"
                 >
                   <Bell className="h-4 w-4" />
-                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-coral rounded-full"></span>
+                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full"></span>
                 </Button>
                 <Button
                   variant="ghost"
@@ -175,7 +179,7 @@ export default function TailorHeader() {
                   className="rounded-full p-2 relative"
                 >
                   <Package className="h-4 w-4" />
-                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-coral rounded-full"></span>
+                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full"></span>
                 </Button>
               </div>
             </div>
