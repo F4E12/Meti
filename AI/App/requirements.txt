@@ -1,0 +1,9 @@
+Flask
+flask-cors
+Werkzeug
+opencv-python
+numpy
+scikit-learn
+mediapipe
+matplotlib
+Pillow

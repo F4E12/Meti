@@ -70,7 +70,7 @@ const config: Config = {
           DEFAULT: "hsl(var(--cream))",
           foreground: "hsl(var(--cream-foreground))",
         },
-        "meti-teal": "#206877",
+        "meti-teal": "#1d295c",
         "meti-orange": "#f3714a",
         "meti-pink": "#dd2b64",
         "meti-cream": "#fafaf5",

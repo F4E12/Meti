@@ -203,7 +203,7 @@ export default function HomePage() {
 
         <div className="absolute bottom-0 left-0 w-64 h-32">
           <svg viewBox="0 0 200 100" className="w-full h-full">
-            <path d="M0,0 Q100,100 200,0 L200,100 L0,100 Z" fill="#206877" />
+            <path d="M0,0 Q100,100 200,0 L200,100 L0,100 Z" fill="#1d295c" />
           </svg>
         </div>
       </section>

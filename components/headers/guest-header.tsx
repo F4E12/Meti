@@ -34,31 +34,31 @@ export default function GuestHeader() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8">
+          <nav className="hidden lg:flex items-center space-x-8 text-white">
             <Link
               href="/"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors relative group"
+              className="text-sm font-medium text-white hover:text-white/80 transition-colors relative group"
             >
               HOME
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
               href="/about"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors relative group"
+              className="text-sm font-medium text-white hover:text-white/80 transition-colors relative group"
             >
               ABOUT
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
               href="/tailors"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors relative group"
+              className="text-sm font-medium text-white hover:text-white/80 transition-colors relative group"
             >
               TAILORS
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
               href="/gallery"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors relative group"
+              className="text-sm font-medium text-white hover:text-white/80 transition-colors relative group"
             >
               GALLERY
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
@@ -111,28 +111,28 @@ export default function GuestHeader() {
           <nav className="flex flex-col space-y-4">
             <Link
               href="/"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2"
+              className="text-sm font-medium text-white hover:text-white/80 transition-colors py-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               HOME
             </Link>
             <Link
               href="/about"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2"
+              className="text-sm font-medium text-white hover:text-white/80 transition-colors py-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               ABOUT
             </Link>
             <Link
               href="/tailors"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2"
+              className="text-sm font-medium text-white hover:text-white/80 transition-colors py-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               TAILORS
             </Link>
             <Link
               href="/gallery"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2"
+              className="text-sm font-medium text-white hover:text-white/80 transition-colors py-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               GALLERY

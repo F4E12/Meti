@@ -44,17 +44,17 @@ export default function TailorHeader() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8">
+          <nav className="hidden lg:flex items-center space-x-8 text-white">
             <Link
               href="/"
-              className="text-sm font-medium text-foreground hover:text-coral transition-colors relative group"
+              className="text-sm font-medium text-white hover:text-coral transition-colors relative group"
             >
               HOME
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-coral group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
               href="/design"
-              className="text-sm font-medium text-foreground hover:text-coral transition-colors relative group flex items-center space-x-1"
+              className="text-sm font-medium text-white hover:text-coral transition-colors relative group flex items-center space-x-1"
             >
               <Palette className="h-4 w-4" />
               <span>DESIGN</span>
@@ -62,7 +62,7 @@ export default function TailorHeader() {
             </Link>
             <Link
               href="/chat"
-              className="text-sm font-medium text-foreground hover:text-coral transition-colors relative group flex items-center space-x-1"
+              className="text-sm font-medium text-white hover:text-coral transition-colors relative group flex items-center space-x-1"
             >
               <MessageCircle className="h-4 w-4" />
               <span>CHAT</span>
@@ -70,7 +70,7 @@ export default function TailorHeader() {
             </Link>
             <Link
               href="/orders"
-              className="text-sm font-medium text-foreground hover:text-coral transition-colors relative group flex items-center space-x-1"
+              className="text-sm font-medium text-white hover:text-coral transition-colors relative group flex items-center space-x-1"
             >
               <Package className="h-4 w-4" />
               <span>ORDERS</span>
@@ -78,7 +78,7 @@ export default function TailorHeader() {
             </Link>
             <Link
               href="/analytics"
-              className="text-sm font-medium text-foreground hover:text-coral transition-colors relative group flex items-center space-x-1"
+              className="text-sm font-medium text-white hover:text-coral transition-colors relative group flex items-center space-x-1"
             >
               <BarChart3 className="h-4 w-4" />
               <span>ANALYTICS</span>
@@ -140,14 +140,14 @@ export default function TailorHeader() {
           <nav className="flex flex-col space-y-4">
             <Link
               href="/"
-              className="text-sm font-medium text-foreground hover:text-coral transition-colors py-2"
+              className="text-sm font-medium text-white hover:text-coral transition-colors py-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               HOME
             </Link>
             <Link
               href="/design"
-              className="text-sm font-medium text-foreground hover:text-coral transition-colors py-2 flex items-center space-x-2"
+              className="text-sm font-medium text-white hover:text-coral transition-colors py-2 flex items-center space-x-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <Palette className="h-4 w-4" />
@@ -155,7 +155,7 @@ export default function TailorHeader() {
             </Link>
             <Link
               href="/chat"
-              className="text-sm font-medium text-foreground hover:text-coral transition-colors py-2 flex items-center space-x-2"
+              className="text-sm font-medium text-white hover:text-coral transition-colors py-2 flex items-center space-x-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <MessageCircle className="h-4 w-4" />
@@ -163,7 +163,7 @@ export default function TailorHeader() {
             </Link>
             <Link
               href="/orders"
-              className="text-sm font-medium text-foreground hover:text-coral transition-colors py-2 flex items-center space-x-2"
+              className="text-sm font-medium text-white hover:text-coral transition-colors py-2 flex items-center space-x-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <Package className="h-4 w-4" />
@@ -171,7 +171,7 @@ export default function TailorHeader() {
             </Link>
             <Link
               href="/analytics"
-              className="text-sm font-medium text-foreground hover:text-coral transition-colors py-2 flex items-center space-x-2"
+              className="text-sm font-medium text-white hover:text-coral transition-colors py-2 flex items-center space-x-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <BarChart3 className="h-4 w-4" />
