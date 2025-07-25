@@ -1,105 +1,162 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# 🧵 Meti - Personalized Batik Tailoring Platform
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+Meti is a full-stack web application that allows customers to design their own Batik T-shirts, connect with tailors, and place custom orders with precision body measurements. The app combines creative tools with AI-assisted tailoring to make fashion more personal, local, and interactive.
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+---
 
-## Features
+## 🌐 Live Demo
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Password-based authentication block installed via the [Supabase UI Library](https://supabase.com/ui/docs/nextjs/password-based-auth)
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+> Coming Soon...
 
-## Demo
+---
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+## 🛠️ Tech Stack
 
-## Deploy to Vercel
+- **Frontend**: [Next.js](https://nextjs.org/), [Tailwind CSS](https://tailwindcss.com/)
+- **Backend**: [Supabase](https://supabase.com/), [Azure OpenAI](https://azure.microsoft.com/en-us/products/ai-services/openai-service/)
+- **AI/ML**: Pose Landmark Detection using [MediaPipe](https://developers.google.com/mediapipe)
+- **Scripting**: Python for body measurement logic and processing
 
-Vercel deployment will guide you through creating a Supabase account and project.
+---
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+## 📁 Features
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+### 🧵 3D Design
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+- Sandbox to design custom Batik T-shirts
+- Interactive Batik pattern editor
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+### 🔐 Auth
 
-## Clone and run locally
+- Secure user authentication (Login/Register)
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+### 💬 Chat
 
-2. Create a Next.js app using the Supabase Starter template npx command
+- Real-time communication between customers and tailors
 
-   ```bash
-   npx create-next-app --example with-supabase with-supabase-app
-   ```
+### 🌟 Featured Weavers
 
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
+- Browse and choose Batik designs from local weavers
+- Start custom T-shirt design from selected patterns
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+### 📏 Measure
 
-3. Use `cd` to change into the app's directory
+- AI-based body measurement using camera (MediaPipe Pose Landmark)
+- Measurements include:
 
-   ```bash
-   cd with-supabase-app
-   ```
+  - Right Arm Length
+  - Left Arm Length
+  - Shoulder Width
+  - Upper Body Height
+  - Hip Width
 
-4. Rename `.env.example` to `.env.local` and update the following:
+### 📦 Orders
 
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
-   ```
+- Place orders for custom-designed shirts
+- Track order status
 
-   Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://supabase.com/dashboard/project/_?showConnect=true)
+### 🛍️ Product
 
-5. You can now run the Next.js local development server:
+- View detailed Batik products available for direct purchase
 
-   ```bash
-   npm run dev
-   ```
+### 👤 Profile
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+- User profile with editable info
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+### 🧵 Tailors
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+- List of available tailors
+- Chat and collaborate with tailors
 
-## Feedback and issues
+### 🛠️ Workspace (for Tailors)
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+- Tailor dashboard to manage orders and designs
+- Add new orders and communicate with customers
 
-## More Supabase examples
+### 🏠 Homepage
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+- Introduction to **Meti**
+- Highlighted weavers
+- Batik shirt design gallery
+- Promotions & local artisan spotlight
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/F4E12/meti.git
+cd meti
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Set up Environment Variables
+
+Create a `.env.local` file and add your keys:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+AZURE_OPENAI_KEY=
+AZURE_OPENAI_ENDPOINT=
+```
+
+### 4. Run the App
+
+```bash
+npm run dev
+```
+
+---
+
+## 🧠 Running the Flask AI API
+
+The AI feature are powered by a separate Flask API.
+
+### 📂 Location
+
+The Flask app is located in:
+
+```
+AI/APP/
+```
+
+### 📦 1. Install Python Dependencies
+
+Make sure you're inside the `AI/APP/` directory:
+
+```bash
+cd AI/APP
+pip install -r requirements.txt
+```
+
+### ▶️ 2. Run the API Server
+
+Start the Flask app:
+
+```bash
+python app.py
+```
+
+By default, it runs at:
+
+```
+http://localhost:5000
+```
+
+Make sure this backend is running when using the main application, especially for all AI services.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please fork the repo and create a pull request.
+
+---
