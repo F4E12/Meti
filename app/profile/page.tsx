@@ -561,8 +561,9 @@ export default function ProfilePage() {
           </Card>
         </div>
       </div>
-
-      <LogoutButton />
+      <div className="w-full h-full m-auto items-center justify-center flex">
+        <LogoutButton />
+      </div>
 
       {showSizePopup && (
         <SizePopup

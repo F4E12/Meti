@@ -1,10 +1,17 @@
 "use client";
 
+import type React from "react";
+
 import CanvasEditor from "@/components/drag-design";
 import ThreeShirtViewer from "@/components/tshirt-viewer";
-import ColorChanger from "@/components/color-changer";
 import { useState, useEffect } from "react";
-import { FaUpload, FaLayerGroup } from "react-icons/fa";
+import { Upload, Layers, Save, Edit3, Grid3X3 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 const CreateDesignPage = () => {
   const [active, setActive] = useState(0);
@@ -18,6 +25,17 @@ const CreateDesignPage = () => {
   const [yTile, setYTile] = useState<number | null>(1);
   const [isEditTitle, setIsEditTitle] = useState(false);
   const [title, setTitle] = useState("PROJECT TITLE");
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const layers = [
+    { id: 0, name: "Outside Collar", active: true },
+    { id: 1, name: "Inside Collar", active: false },
+    { id: 2, name: "Back", active: false },
+    { id: 3, name: "Right Front", active: false },
+    { id: 4, name: "Left Front", active: false },
+    { id: 5, name: "Right Sleeve", active: false },
+    { id: 6, name: "Left Sleeve", active: false },
+  ];
 
   // Initialize image and pattern with /assets/megamendung.jpg
   useEffect(() => {
@@ -62,11 +80,30 @@ const CreateDesignPage = () => {
     setTriggerGenerate(true);
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Image = reader.result as string;
+        if (base64Image.startsWith("data:image/")) {
+          setImage(base64Image);
+          setPattern(base64Image);
+        } else {
+          console.error("Invalid uploaded image format");
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleUpdateTile = async () => {
     if (!pattern) {
       alert("No pattern image available for tiling.");
       return;
     }
+
+    setIsProcessing(true);
     const payload = {
       image: pattern,
       x: xTile,
@@ -97,157 +134,224 @@ const CreateDesignPage = () => {
     } catch (error) {
       console.error("Error sending data to Flask:", error);
       alert("Failed to send image data to Flask.");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   return (
-    <div className="">
-      <div className="flex h-screen p-6 px-12 bg-white text-black justify-around">
-        <div className="flex flex-col items-center mr-6 space-y-2">
-          <div className="flex gap-2 items-center cursor-pointer h-full">
-            <label
-              htmlFor="file-upload"
-              className="flex gap-2 items-center cursor-pointer"
-            >
-              <FaUpload className="text-xl" />
-              <p>Upload</p>
-            </label>
-            <input
-              id="file-upload"
-              type="file"
-              className="hidden"
-              accept="image/*"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    const base64Image = reader.result as string;
-                    if (base64Image.startsWith("data:image/")) {
-                      setImage(base64Image);
-                      setPattern(base64Image);
-                    } else {
-                      console.error("Invalid uploaded image format");
-                    }
-                  };
-                  reader.readAsDataURL(file);
-                }
-              }}
-            />
-          </div>
-          <ColorChanger pattern={pattern} setPattern={setPattern} />
-        </div>
-
-        <div className="flex-1">
-          {isEditTitle ? (
-            <div className="flex items-center mb-4">
-              <input
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {/* Header */}
+      <div className="bg-white border-b border-slate-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {isEditTitle ? (
+              <Input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && setIsEditTitle(false)}
                 onBlur={() => setIsEditTitle(false)}
-                className="bg-white border-black border-2 rounded-md px-3 text-lg font-semibold focus:outline-none focus:border-blue-500"
+                className="text-xl font-bold border-2 border-blue-500"
+                autoFocus
               />
-            </div>
-          ) : (
-            <h1
-              className="text-lg font-semibold mb-4"
-              onClick={() => setIsEditTitle(true)}
-            >
-              {title}
-            </h1>
-          )}
-          <div className="flex">
-            <div className="flex space-x-6 m-auto items-center">
-              <div className="w-96 h-96 bg-gray-300 rounded-lg">
-                <ThreeShirtViewer
-                  combinedTextureFromCanvas={combinedTextureUrl}
-                />
+            ) : (
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsEditTitle(true)}
+                  className="text-slate-500 hover:text-slate-700"
+                >
+                  <Edit3 className="w-4 h-4" />
+                </Button>
               </div>
-              <div className="w-96 h-96 bg-gray-300 rounded-lg margin-auto">
-                <CanvasEditor
-                  active={active}
-                  triggerGenerate={triggerGenerate}
-                  setTriggerGenerate={setTriggerGenerate}
-                  onTextureGenerated={handleCombinedTextureGenerated}
-                  pattern={pattern}
-                />
-                <div className="flex justify-center items-center gap-2 m-3">
-                  <label
-                    htmlFor="tile_count"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Tile Count
-                  </label>
-                  <input
+            )}
+          </div>
+          <Badge variant="secondary" className="text-sm">
+            Design Mode
+          </Badge>
+        </div>
+      </div>
+
+      <div className="flex h-[calc(100vh-80px)]">
+        {/* Left Sidebar - Tools */}
+        <div className="w-80 bg-white border-r border-slate-200 p-6 space-y-6 overflow-y-auto">
+          {/* Upload Section */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Upload className="w-5 h-5 text-blue-500" />
+                Upload Image
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <label
+                htmlFor="file-upload"
+                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors"
+              >
+                <Upload className="w-8 h-8 text-slate-400 mb-2" />
+                <span className="text-sm text-slate-600">
+                  Click to upload image
+                </span>
+                <span className="text-xs text-slate-400">
+                  PNG, JPG up to 10MB
+                </span>
+              </label>
+              <input
+                id="file-upload"
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileUpload}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Tile Controls */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Grid3X3 className="w-5 h-5 text-green-500" />
+                Pattern Tiling
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="x-tile" className="text-sm font-medium">
+                    X Tiles
+                  </Label>
+                  <Input
+                    id="x-tile"
                     type="number"
-                    id="tile_count1"
-                    className="w-16 bg-white rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    min="1"
+                    max="10"
+                    value={xTile || 1}
                     onChange={(e) => setXTile(Number(e.target.value))}
-                    value={xTile || 0}
+                    className="mt-1"
                   />
-                  ×
-                  <input
+                </div>
+                <div>
+                  <Label htmlFor="y-tile" className="text-sm font-medium">
+                    Y Tiles
+                  </Label>
+                  <Input
+                    id="y-tile"
                     type="number"
-                    id="tile_count2"
-                    className="w-16 bg-white rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    min="1"
+                    max="10"
+                    value={yTile || 1}
                     onChange={(e) => setYTile(Number(e.target.value))}
-                    value={yTile || 0}
+                    className="mt-1"
                   />
-                  <button
-                    onClick={handleUpdateTile}
-                    className="px-4 py-2 rounded-md bg-blue-600 text-white text-sm font-medium shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-opacity duration-300 ease-in-out opacity-100"
-                  >
-                    Update
-                  </button>
                 </div>
               </div>
-            </div>
+              <Button
+                onClick={handleUpdateTile}
+                disabled={isProcessing}
+                className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+              >
+                {isProcessing ? "Processing..." : "Update Pattern"}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Layers */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Layers className="w-5 h-5 text-orange-500" />
+                Layers
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {layers.map((layer) => (
+                  <Button
+                    key={layer.id}
+                    variant={active === layer.id ? "default" : "outline"}
+                    size="sm"
+                    className="w-full justify-start text-xs"
+                    onClick={() => setActive(layer.id)}
+                  >
+                    {layer.name}
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-1 p-6">
+          <div className="grid lg:grid-cols-2 gap-6 h-full">
+            {/* 3D Viewer */}
+            <Card className="shadow-lg">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">3D Preview</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg overflow-hidden">
+                  <ThreeShirtViewer
+                    combinedTextureFromCanvas={combinedTextureUrl}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Canvas Editor */}
+            <Card className="shadow-lg">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Design Canvas</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg overflow-hidden">
+                  <CanvasEditor
+                    active={active}
+                    triggerGenerate={triggerGenerate}
+                    setTriggerGenerate={setTriggerGenerate}
+                    onTextureGenerated={handleCombinedTextureGenerated}
+                    pattern={pattern}
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
-        <div className="ml-auto flex flex-col space-y-4">
-          <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 rounded-full bg-red-500" />
-            <div className="w-6 h-6 rounded-full bg-blue-500" />
-            <div className="w-6 h-6 rounded-full bg-yellow-400" />
-            <button className="w-6 h-6 rounded-full border border-black text-center">
-              +
-            </button>
+        {/* Right Sidebar - Actions */}
+        <div className="w-64 bg-white border-l border-slate-200 p-6 space-y-6">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-700 mb-3">
+              Active Layer
+            </h3>
+            <Badge variant="outline" className="w-full justify-center py-2">
+              {layers[active]?.name || "Unknown"}
+            </Badge>
           </div>
 
-          <div className="p-3 rounded-lg bg-gray-100">
-            <div className="flex items-center mb-2 gap-2">
-              <FaLayerGroup className="text-sm" />
-              <span className="text-sm font-medium">LAYERS</span>
-            </div>
-            <div className="flex flex-col space-y-1">
-              {[
-                "BACK",
-                "FRONT RIGHT",
-                "FRONT LEFT",
-                "COLAR 1",
-                "COLAR 2",
-                "COLAR 3",
-              ].map((layer, idx) => (
-                <button
-                  key={layer}
-                  className="bg-white border border-gray-400 px-3 py-1 text-xs rounded hover:bg-gray-200"
-                  onClick={() => setActive(idx)}
-                >
-                  {layer}
-                </button>
-              ))}
-            </div>
-          </div>
+          <Separator />
 
-          <button
-            className="bg-gray-300 px-6 py-2 rounded text-sm hover:bg-gray-400"
-            onClick={handleGenerate}
-          >
-            SAVE
-          </button>
+          {/* Actions */}
+          <div className="space-y-3">
+            <Button
+              onClick={handleGenerate}
+              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              Save Design
+            </Button>
+
+            <Button variant="outline" className="w-full bg-transparent">
+              Export
+            </Button>
+
+            <Button variant="outline" className="w-full bg-transparent">
+              Preview
+            </Button>
+          </div>
         </div>
       </div>
     </div>
