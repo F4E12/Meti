@@ -13,6 +13,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Header from "@/components/headers/header";
 
 export default function MeasurePage() {
   const router = useRouter();
@@ -180,24 +181,7 @@ export default function MeasurePage() {
   return (
     <div className="min-h-screen bg-meti-cream">
       {/* Header */}
-      <header className="bg-meti-teal px-6 py-4">
-        <div className="flex items-center justify-between max-w-6xl mx-auto">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center space-x-2 text-white hover:text-meti-pink transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Back</span>
-          </button>
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-meti-pink rounded flex items-center justify-center">
-              <span className="text-white font-bold">M</span>
-            </div>
-            <span className="text-white font-bold text-xl">METI</span>
-          </div>
-          <div className="w-16"></div>
-        </div>
-      </header>
+      <Header />
 
       <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Page Header */}

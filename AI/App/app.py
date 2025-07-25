@@ -171,74 +171,74 @@ def allowed_file(filename):
 
 
 # --- New API Endpoint ---
-@app.route('/api/process-image', methods=['POST'])
-def process_image_api():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part in the request'}), 400
-    
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No file selected'}), 400
+    @app.route('/api/process-image', methods=['POST'])
+    def process_image_api():
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part in the request'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
 
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        input_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(input_path)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            input_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(input_path)
 
-        # --- Image Processing Logic (same as before) ---
-        try:
-            coin_logo_path = "coin_reference.png"
-            image_bgr = cv2.imread(input_path)
-            
-            pixel_per_cm, image_with_coin_box = detect_coin_scale(image_bgr, coin_logo_path)
-            if pixel_per_cm is None:
-                return jsonify({'error': 'Reference coin not found. Cannot calculate measurements.'}), 400
+            # --- Image Processing Logic (same as before) ---
+            try:
+                coin_logo_path = "coin_reference.png"
+                image_bgr = cv2.imread(input_path)
+                
+                pixel_per_cm, image_with_coin_box = detect_coin_scale(image_bgr, coin_logo_path)
+                if pixel_per_cm is None:
+                    return jsonify({'error': 'Reference coin not found. Cannot calculate measurements.'}), 400
 
-            base_options = python.BaseOptions(model_asset_path='pose_landmarker.task')
-            options = vision.PoseLandmarkerOptions(base_options=base_options, output_segmentation_masks=True)
-            detector = vision.PoseLandmarker.create_from_options(options)
-            image_rgb = cv2.cvtColor(image_with_coin_box, cv2.COLOR_BGR2RGB)
-            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image_rgb)
-            detection_result = detector.detect(mp_image)
+                base_options = python.BaseOptions(model_asset_path='pose_landmarker.task')
+                options = vision.PoseLandmarkerOptions(base_options=base_options, output_segmentation_masks=True)
+                detector = vision.PoseLandmarker.create_from_options(options)
+                image_rgb = cv2.cvtColor(image_with_coin_box, cv2.COLOR_BGR2RGB)
+                mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image_rgb)
+                detection_result = detector.detect(mp_image)
 
-            if not detection_result.pose_landmarks:
-                return jsonify({'error': 'No pose detected in the image.'}), 400
+                if not detection_result.pose_landmarks:
+                    return jsonify({'error': 'No pose detected in the image.'}), 400
 
-            annotated_image_rgb = draw_landmarks_on_image(mp_image.numpy_view(), detection_result)
-            
-            landmarks = detection_result.pose_landmarks[0]
-            lm11, lm12, lm13, lm14, lm23, lm24 = landmarks[11], landmarks[12], landmarks[13], landmarks[14], landmarks[23], landmarks[24]
-            image_width, image_height = mp_image.width, mp_image.height
+                annotated_image_rgb = draw_landmarks_on_image(mp_image.numpy_view(), detection_result)
+                
+                landmarks = detection_result.pose_landmarks[0]
+                lm11, lm12, lm13, lm14, lm23, lm24 = landmarks[11], landmarks[12], landmarks[13], landmarks[14], landmarks[23], landmarks[24]
+                image_width, image_height = mp_image.width, mp_image.height
 
-            def to_cm(dist_px): return dist_px / pixel_per_cm
+                def to_cm(dist_px): return dist_px / pixel_per_cm
 
-            measurements = {
-                "Right arm length": f"{to_cm(calc_pixel_distance(lm14, lm12, image_width, image_height)):.2f}",
-                "Shoulder width": f"{to_cm(calc_pixel_distance(lm11, lm12, image_width, image_height)):.2f}",
-                "Left arm length": f"{to_cm(calc_pixel_distance(lm11, lm13, image_width, image_height)):.2f}",
-                "Upper body height": f"{to_cm(calc_pixel_distance(lm12, lm24, image_width, image_height)):.2f}",
-                "Hip width": f"{to_cm(calc_pixel_distance(lm24, lm23, image_width, image_height)):.2f}"
-            }
-            
-            output_filename = 'processed_' + filename
-            output_path = os.path.join(app.config['UPLOAD_FOLDER'], output_filename)
-            annotated_image_bgr = cv2.cvtColor(annotated_image_rgb, cv2.COLOR_RGB2BGR)
-            cv2.imwrite(output_path, annotated_image_bgr)
-            
-            # Return the full URL for the processed image
-            image_url = url_for('static', filename=f'uploads/{output_filename}', _external=True)
+                measurements = {
+                    "Right arm length": f"{to_cm(calc_pixel_distance(lm14, lm12, image_width, image_height)):.2f}",
+                    "Shoulder width": f"{to_cm(calc_pixel_distance(lm11, lm12, image_width, image_height)):.2f}",
+                    "Left arm length": f"{to_cm(calc_pixel_distance(lm11, lm13, image_width, image_height)):.2f}",
+                    "Upper body height": f"{to_cm(calc_pixel_distance(lm12, lm24, image_width, image_height)):.2f}",
+                    "Hip width": f"{to_cm(calc_pixel_distance(lm24, lm23, image_width, image_height)):.2f}"
+                }
+                
+                output_filename = 'processed_' + filename
+                output_path = os.path.join(app.config['UPLOAD_FOLDER'], output_filename)
+                annotated_image_bgr = cv2.cvtColor(annotated_image_rgb, cv2.COLOR_RGB2BGR)
+                cv2.imwrite(output_path, annotated_image_bgr)
+                
+                # Return the full URL for the processed image
+                image_url = url_for('static', filename=f'uploads/{output_filename}', _external=True)
 
-            # Success response
-            return jsonify({
-                'measurements': measurements,
-                'image_url': image_url
-            })
+                # Success response
+                return jsonify({
+                    'measurements': measurements,
+                    'image_url': image_url
+                })
 
-        except Exception as e:
-            print(f"Error processing image: {e}")
-            return jsonify({'error': str(e)}), 500
+            except Exception as e:
+                print(f"Error processing image: {e}")
+                return jsonify({'error': str(e)}), 500
 
-    return jsonify({'error': 'Invalid file type'}), 400
+        return jsonify({'error': 'Invalid file type'}), 400
 
 def extract_shirt_patch_from_image(image):
     """
