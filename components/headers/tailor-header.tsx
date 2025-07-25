@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import {
   User,
   Menu,
-  Search,
   Package,
   MessageCircle,
   Palette,
@@ -88,29 +87,6 @@ export default function TailorHeader() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-3">
-            <Button variant="ghost" size="sm" className="rounded-full p-2">
-              <Search className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="rounded-full p-2 relative"
-            >
-              <Bell className="h-4 w-4" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-coral rounded-full text-xs flex items-center justify-center text-white">
-                5
-              </span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="rounded-full p-2 relative"
-            >
-              <Package className="h-4 w-4" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-coral rounded-full text-xs flex items-center justify-center text-white">
-                7
-              </span>
-            </Button>
             <Link href="/profile">
               <Button variant="ghost" size="sm" className="rounded-full p-2">
                 <User className="h-4 w-4" />
