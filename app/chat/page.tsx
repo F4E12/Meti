@@ -28,7 +28,7 @@ interface SupabaseUser {
   upper_body_height: number | null;
   hip_width: number | null;
   created_at: string;
-  TailorDetails: { bio: string | null; rating: number } | null;
+  TailorDetails: { bio: string | null; rating: number }[] | null;
 }
 
 interface SupabaseChat {
@@ -54,9 +54,10 @@ export default function ChatListPage() {
       try {
         const res = await fetch("/api/user");
         if (!res.ok) {
+          console.error("Failed to fetch user:", res.statusText);
           setRole("guest");
           setIsLoading(false);
-          return;
+          return null;
         }
         const data: { user: User } = await res.json();
         setRole(data.user.role);
@@ -65,20 +66,29 @@ export default function ChatListPage() {
         console.error("Error fetching user:", error);
         setRole("guest");
         setIsLoading(false);
+        return null;
       }
     };
 
     const fetchChats = async () => {
-      const res = await fetch("/api/chats");
-      if (!res.ok) throw new Error("Failed fetching chats");
-      const data = await res.json();
-      setChats(data.chats);
-      setIsLoading(false);
+      try {
+        const res = await fetch("/api/chats");
+        if (!res.ok) {
+          throw new Error(`Failed fetching chats: ${res.statusText}`);
+        }
+        const data = await res.json();
+        console.log("Fetched chats data:", data.chats); // Log the response data
+        setChats(data.chats);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching chats:", error);
+        setIsLoading(false);
+      }
     };
 
     const init = async () => {
-      const role = await fetchUser();
-      if (role === "customer" || role === "tailor") {
+      const userRole = await fetchUser();
+      if (userRole === "customer" || userRole === "tailor") {
         await fetchChats();
       } else {
         router.push("/");
@@ -95,8 +105,16 @@ export default function ChatListPage() {
     const fetchUserId = async () => {
       const {
         data: { user },
+        error,
       } = await supabase.auth.getUser();
-      return user?.id;
+      if (error || !user) {
+        console.error(
+          "Failed to fetch user ID for subscription:",
+          error?.message
+        );
+        return null;
+      }
+      return user.id;
     };
 
     fetchUserId().then((userId) => {
@@ -113,83 +131,148 @@ export default function ChatListPage() {
             filter: `user_id=eq.${userId},tailor_id=eq.${userId}`,
           },
           async (payload) => {
-            const { data, error } = await supabase
+            // Fetch chat details
+            const { data: chatData, error: chatError } = await supabase
               .from("chat")
               .select(
                 `
                 chat_id,
                 user_id,
                 tailor_id,
-                created_at,
-                customer:Users!user_id (
-                  user_id,
-                  username,
-                  email,
-                  role,
-                  full_name,
-                  location,
-                  dialect,
-                  profile_picture_url,
-                  right_arm_length,
-                  shoulder_width,
-                  left_arm_length,
-                  upper_body_height,
-                  hip_width,
-                  created_at,
-                  TailorDetails (bio, rating)
-                ),
-                tailor:Users!tailor_id (
-                  user_id,
-                  username,
-                  email,
-                  role,
-                  full_name,
-                  location,
-                  dialect,
-                  profile_picture_url,
-                  right_arm_length,
-                  shoulder_width,
-                  left_arm_length,
-                  upper_body_height,
-                  hip_width,
-                  created_at,
-                  TailorDetails (bio, rating)
-                )
+                created_at
                 `
               )
               .eq("chat_id", payload.new.chat_id)
               .single()
               .returns<SupabaseChat>();
 
-            if (error || !data) {
-              console.error("Error fetching new chat:", error?.message);
+            if (chatError || !chatData) {
+              console.error("Error fetching new chat:", chatError?.message);
               return;
             }
 
+            // Fetch customer data
+            const { data: customerData, error: customerError } = await supabase
+              .from("users")
+              .select(
+                `
+                user_id,
+                username,
+                email,
+                role,
+                full_name,
+                location,
+                dialect,
+                profile_picture_url,
+                right_arm_length,
+                shoulder_width,
+                left_arm_length,
+                upper_body_height,
+                hip_width,
+                created_at
+                `
+              )
+              .eq("user_id", chatData.user_id)
+              .single()
+              .returns<SupabaseUser>();
+
+            if (customerError || !customerData) {
+              console.error(
+                "Error fetching customer for new chat:",
+                customerError?.message
+              );
+              return;
+            }
+
+            // Fetch customer TailorDetails
+            const { data: customerDetails, error: customerDetailsError } =
+              await supabase
+                .from("tailordetails")
+                .select("bio, rating")
+                .eq("user_id", chatData.user_id)
+                .single();
+
+            if (customerDetailsError) {
+              console.warn(
+                "Customer TailorDetails not found for new chat:",
+                customerDetailsError.message
+              );
+            }
+
+            // Fetch tailor data
+            const { data: tailorData, error: tailorError } = await supabase
+              .from("users")
+              .select(
+                `
+                user_id,
+                username,
+                email,
+                role,
+                full_name,
+                location,
+                dialect,
+                profile_picture_url,
+                right_arm_length,
+                shoulder_width,
+                left_arm_length,
+                upper_body_height,
+                hip_width,
+                created_at
+                `
+              )
+              .eq("user_id", chatData.tailor_id)
+              .single()
+              .returns<SupabaseUser>();
+
+            if (tailorError || !tailorData) {
+              console.error(
+                "Error fetching tailor for new chat:",
+                tailorError?.message
+              );
+              return;
+            }
+
+            // Fetch tailor TailorDetails
+            const { data: tailorDetails, error: tailorDetailsError } =
+              await supabase
+                .from("tailordetails")
+                .select("bio, rating")
+                .eq("user_id", chatData.tailor_id)
+                .single();
+
+            if (tailorDetailsError) {
+              console.warn(
+                "Tailor TailorDetails not found for new chat:",
+                tailorDetailsError.message
+              );
+            }
+
             const newChat: Chat = {
-              chat_id: data.chat_id,
-              user_id: data.user_id,
-              tailor_id: data.tailor_id,
-              created_at: data.created_at,
-              customer: data.customer
-                ? {
-                    ...data.customer,
-                    TailorDetails: data.customer.TailorDetails
-                      ? [data.customer.TailorDetails]
-                      : null,
-                  }
-                : ({} as User),
-              tailor: data.tailor
-                ? {
-                    ...data.tailor,
-                    TailorDetails: data.tailor.TailorDetails
-                      ? [data.tailor.TailorDetails]
-                      : null,
-                  }
-                : ({} as User),
+              chat_id: chatData.chat_id,
+              user_id: chatData.user_id,
+              tailor_id: chatData.tailor_id,
+              created_at: chatData.created_at,
+              customer: {
+                ...customerData,
+                TailorDetails: customerDetails
+                  ? [
+                      {
+                        bio: customerDetails.bio,
+                        rating: customerDetails.rating,
+                      },
+                    ]
+                  : null,
+              },
+              tailor: {
+                ...tailorData,
+                TailorDetails: tailorDetails
+                  ? [{ bio: tailorDetails.bio, rating: tailorDetails.rating }]
+                  : null,
+              },
             };
 
             setChats((prev) => [newChat, ...prev]);
+            console.log("New chat added via subscription:", newChat);
           }
         )
         .subscribe();

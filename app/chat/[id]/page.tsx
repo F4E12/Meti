@@ -4,33 +4,13 @@ import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Send, ArrowLeft, MessageCircle } from "lucide-react";
+import { Loader2, Send, ArrowLeft } from "lucide-react";
 import Header from "@/components/headers/header";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Chat } from "@/lib/model/chat";
 import { Message } from "@/lib/model/message";
 import { User } from "@/lib/model/user";
-
-// Define the expected shape of the Supabase response
-interface SupabaseUser {
-  user_id: string;
-  username: string;
-  email: string;
-  role: "customer" | "tailor";
-  full_name: string | null;
-  location: string | null;
-  dialect: string | null;
-  profile_picture_url: string;
-  right_arm_length: number | null;
-  shoulder_width: number | null;
-  left_arm_length: number | null;
-  upper_body_height: number | null;
-  hip_width: number | null;
-  created_at: string;
-  TailorDetails: { bio: string | null; rating: number } | null;
-}
 
 interface SupabaseMessage {
   message_id: string;
@@ -40,57 +20,96 @@ interface SupabaseMessage {
   translated_content: string | null;
   language: string | null;
   created_at: string;
-  sender: SupabaseUser | null;
 }
 
 export default function ChatPage() {
   const router = useRouter();
-  const { chatId } = useParams();
+  const { id } = useParams();
   const [role, setRole] = useState<"guest" | "customer" | "tailor" | "loading">(
     "loading"
   );
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [chat, setChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
+  const [translatedMessages, setTranslatedMessages] = useState<
+    Record<string, string>
+  >({});
+  const [translationError, setTranslationError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
+
+  // Normalize chatId
+  const chatId = Array.isArray(id) ? id[0] : id;
+
+  // Supported languages for translation
+  const supportedLanguages = [
+    "Indonesia",
+    "Jawa",
+    "Sunda",
+    "Batak",
+    "Betawi",
+    "Minang",
+    "Bugis",
+    "Madura",
+    "Bali",
+    "English",
+  ];
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const res = await fetch("/api/user");
         if (!res.ok) {
-          setRole("guest");
-          setIsLoading(false);
-          return;
+          console.error("Failed to fetch user:", res.statusText);
+          return null;
         }
         const data: { user: User } = await res.json();
         setRole(data.user.role);
-        return data.user.role;
+        setCurrentUserId(data.user.user_id); // Store current user ID
+        return data.user;
       } catch (error) {
         console.error("Error fetching user:", error);
-        setRole("guest");
-        setIsLoading(false);
+        return null;
       }
     };
 
     const fetchChat = async () => {
-      const res = await fetch(`/api/chats/${chatId}`);
-      if (!res.ok) throw new Error("Failed fetching chat");
-      const data = await res.json();
-      setChat(data.chat);
-      setMessages(data.messages);
-      setIsLoading(false);
+      try {
+        console.log("Fetching chat with ID:", chatId);
+        const res = await fetch(`/api/chats/${chatId}`);
+        if (!res.ok) {
+          throw new Error(`Failed fetching chat: ${res.statusText}`);
+        }
+        const data = await res.json();
+        console.log("Fetched chat data:", data);
+        setChat(data.chat);
+        setMessages(data.messages);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching chat:", error);
+        setIsLoading(false);
+        router.push("/chat");
+      }
     };
 
     const init = async () => {
-      const role = await fetchUser();
-      if (role === "customer" || role === "tailor") {
+      if (!chatId || chatId === "undefined") {
+        console.error("Invalid chatId: chatId is undefined or invalid");
+        router.push("/chat");
+        setIsLoading(false);
+        return;
+      }
+
+      const user = await fetchUser();
+      if (user && (user.role === "customer" || user.role === "tailor")) {
         await fetchChat();
       } else {
         router.push("/");
+        setIsLoading(false);
       }
     };
 
@@ -100,7 +119,12 @@ export default function ChatPage() {
   // Real-time subscription for new messages
   useEffect(() => {
     if (role !== "customer" && role !== "tailor") return;
+    if (!chatId || chatId === "undefined") {
+      console.warn("Skipping subscription due to invalid chatId");
+      return;
+    }
 
+    console.log("Setting up Supabase subscription for chatId:", chatId);
     const channel = supabase
       .channel(`messages:${chatId}`)
       .on(
@@ -112,7 +136,8 @@ export default function ChatPage() {
           filter: `chat_id=eq.${chatId}`,
         },
         async (payload) => {
-          const { data, error } = await supabase
+          console.log("Received new message payload:", payload);
+          const { data: messageData, error: messageError } = await supabase
             .from("Messages")
             .select(
               `
@@ -122,61 +147,104 @@ export default function ChatPage() {
               content,
               translated_content,
               language,
-              created_at,
-              sender:Users!sender_id (
-                user_id,
-                username,
-                email,
-                role,
-                full_name,
-                location,
-                dialect,
-                profile_picture_url,
-                right_arm_length,
-                shoulder_width,
-                left_arm_length,
-                upper_body_height,
-                hip_width,
-                created_at,
-                TailorDetails (bio, rating)
-              )
+              created_at
               `
             )
             .eq("message_id", payload.new.message_id)
             .single()
             .returns<SupabaseMessage>();
 
-          if (error || !data) {
-            console.error("Error fetching new message:", error?.message);
+          if (messageError || !messageData) {
+            console.error("Error fetching new message:", messageError?.message);
             return;
           }
 
+          // Fetch sender data
+          const { data: senderData, error: senderError } = await supabase
+            .from("Users")
+            .select(
+              `
+              user_id,
+              username,
+              email,
+              role,
+              full_name,
+              location,
+              dialect,
+              profile_picture_url,
+              right_arm_length,
+              shoulder_width,
+              left_arm_length,
+              upper_body_height,
+              hip_width,
+              created_at
+              `
+            )
+            .eq("user_id", messageData.sender_id)
+            .single()
+            .returns<User>();
+
+          if (senderError || !senderData) {
+            console.error(
+              "Error fetching sender for new message:",
+              senderError?.message
+            );
+            return;
+          }
+
+          // Fetch sender TailorDetails if sender is a tailor
+          let senderDetails: { bio: string | null; rating: number } | null =
+            null;
+          if (senderData.role === "tailor") {
+            const { data, error: senderDetailsError } = await supabase
+              .from("tailordetails")
+              .select("bio, rating")
+              .eq("user_id", messageData.sender_id)
+              .single();
+
+            if (senderDetailsError) {
+              console.warn(
+                "Sender TailorDetails not found for new message, proceeding without:",
+                senderDetailsError.message
+              );
+            } else {
+              senderDetails = data;
+            }
+          }
+
           const newMessage: Message = {
-            message_id: data.message_id,
-            chat_id: data.chat_id,
-            sender_id: data.sender_id,
-            content: data.content,
-            translated_content: data.translated_content
-              ? JSON.parse(data.translated_content)
+            message_id: messageData.message_id,
+            chat_id: messageData.chat_id,
+            sender_id: messageData.sender_id,
+            content: messageData.content,
+            translated_content: messageData.translated_content
+              ? JSON.parse(messageData.translated_content)
               : null,
-            language: data.language,
-            created_at: data.created_at,
-            sender: data.sender
-              ? {
-                  ...data.sender,
-                  TailorDetails: data.sender.TailorDetails
-                    ? [data.sender.TailorDetails]
-                    : null,
-                }
-              : ({} as User),
+            language: messageData.language,
+            created_at: messageData.created_at,
+            sender: {
+              ...senderData,
+              TailorDetails: senderDetails
+                ? [{ bio: senderDetails.bio, rating: senderDetails.rating }]
+                : null,
+            },
           };
 
-          setMessages((prev) => [...prev, newMessage]);
+          // Prevent duplicate messages by checking message_id
+          setMessages((prev) =>
+            prev.some((msg) => msg.message_id === newMessage.message_id)
+              ? prev
+              : [...prev, newMessage]
+          );
+          console.log("New message added via subscription:", newMessage);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Subscription status:", status);
+      });
 
     return () => {
+      console.log("Cleaning up Supabase subscription for chatId:", chatId);
       supabase.removeChannel(channel);
     };
   }, [role, supabase, chatId]);
@@ -187,17 +255,24 @@ export default function ChatPage() {
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim()) return; // Validate non-empty message
     setSending(true);
     try {
       const res = await fetch(`/api/chats/${chatId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: newMessage, language: null }),
+        body: JSON.stringify({ content: newMessage.trim(), language: null }),
       });
-      if (!res.ok) throw new Error("Failed to send message");
+      if (!res.ok) {
+        throw new Error(`Failed to send message: ${res.statusText}`);
+      }
       const data = await res.json();
-      setMessages((prev) => [...prev, data.message]);
+      // Prevent duplicate messages by checking message_id
+      setMessages((prev) =>
+        prev.some((msg) => msg.message_id === data.message.message_id)
+          ? prev
+          : [...prev, data.message]
+      );
       setNewMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
@@ -207,110 +282,190 @@ export default function ChatPage() {
     }
   };
 
+  // Handle translation request
+  const handleTranslate = async (messageId: string, language: string) => {
+    setTranslationError(null); // Reset error state
+    try {
+      const response = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageId, targetLanguage: language }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.translatedText) {
+        setTranslatedMessages((prev) => ({
+          ...prev,
+          [messageId]: data.translatedText,
+        }));
+      } else if (data.error) {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      console.error("Translation failed:", error);
+      setTranslationError("Failed to translate message");
+    }
+  };
+
+  // Handle showing original message
+  const handleShowOriginal = (messageId: string) => {
+    setTranslatedMessages((prev) => {
+      const newTranslatedMessages = { ...prev };
+      delete newTranslatedMessages[messageId];
+      return newTranslatedMessages;
+    });
+    setSelectedLanguage(null); // Reset selected language
+  };
+
   if (!isLoading && role !== "customer" && role !== "tailor") {
-    router.push("/");
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
       <Header />
-      <section className="py-12 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center mb-6">
-            <Link href="/chat">
-              <Button variant="ghost" className="mr-4">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <h1 className="text-3xl font-serif font-bold">
-              {chat
-                ? role === "customer"
-                  ? chat.tailor.full_name || chat.tailor.username
-                  : chat.customer.full_name || chat.customer.username
-                : "Loading..."}
-            </h1>
-          </div>
-          {isLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <div className="text-center space-y-4">
-                <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-                <p className="text-muted-foreground">Loading chat...</p>
-              </div>
-            </div>
-          ) : messages.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
-                <MessageCircle className="h-12 w-12 text-muted-foreground" />
-              </div>
-              <h3 className="text-2xl font-serif font-bold mb-4">
-                No messages yet
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Start the conversation with your tailor!
-              </p>
-            </div>
-          ) : (
-            <Card className="border-0 shadow-lg bg-background/80 backdrop-blur-sm">
-              <CardContent className="p-6">
-                <div className="max-h-[60vh] overflow-y-auto mb-4">
-                  {messages.map((message) => (
-                    <div
-                      key={message.message_id}
-                      className={`flex ${
-                        message.sender_id === chat?.user_id &&
-                        role === "customer"
-                          ? "justify-end"
-                          : "justify-start"
-                      } mb-4`}
-                    >
-                      <div
-                        className={`max-w-[70%] p-4 rounded-lg ${
-                          message.sender_id === chat?.user_id &&
-                          role === "customer"
-                            ? "bg-gradient-teal-pink text-white"
-                            : "bg-muted text-foreground"
-                        }`}
-                      >
-                        <p className="text-sm">{message.content}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {new Date(message.created_at).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  <div ref={messagesEndRef} />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Input
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type your message..."
-                    className="flex-1 h-12 border-border/50"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleSendMessage();
-                    }}
-                  />
-                  <Button
-                    onClick={handleSendMessage}
-                    disabled={sending || !newMessage.trim()}
-                    className="bg-gradient-teal-pink hover:opacity-90 text-white rounded-xl"
-                  >
-                    {sending ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                    ) : (
-                      <Send className="h-5 w-5" />
-                    )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+      <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full bg-white shadow-md">
+        {/* Chat Header */}
+        <div className="flex items-center p-4 border-b bg-white sticky top-0 z-10">
+          <Link href="/chat">
+            <Button variant="ghost" size="icon" className="mr-2">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <h1 className="text-xl font-semibold truncate">
+            {chat
+              ? role === "customer"
+                ? chat.tailor.full_name || chat.tailor.username
+                : chat.customer.full_name || chat.customer.username
+              : "Loading..."}
+          </h1>
         </div>
-      </section>
+
+        {/* Messages Area */}
+        {isLoading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center space-y-4">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-500" />
+              <p className="text-gray-500">Loading chat...</p>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+            {messages.length === 0 ? (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-gray-500 text-center">
+                  Start chatting with your{" "}
+                  {role === "customer" ? "tailor" : "customer"}!
+                </p>
+              </div>
+            ) : (
+              <>
+                {translationError && (
+                  <div className="text-red-500 text-sm mb-2">
+                    {translationError}
+                  </div>
+                )}
+                {messages.map((message) => (
+                  <div
+                    key={message.message_id}
+                    className={`flex ${
+                      message.sender_id === currentUserId
+                        ? "justify-end"
+                        : "justify-start"
+                    } mb-3`}
+                  >
+                    <div
+                      className={`max-w-[75%] p-3 rounded-2xl shadow-sm ${
+                        message.sender_id === currentUserId
+                          ? "bg-blue-500 text-white rounded-br-sm"
+                          : "bg-white text-gray-800 rounded-bl-sm"
+                      }`}
+                    >
+                      <p className="text-sm">
+                        {translatedMessages[message.message_id] ||
+                          message.content}
+                      </p>
+                      {/* Show translation options only for messages from the other user */}
+                      {message.sender_id !== currentUserId && (
+                        <div className="mt-2">
+                          <select
+                            value={selectedLanguage || ""}
+                            onChange={(e) => {
+                              const lang = e.target.value;
+                              setSelectedLanguage(lang);
+                              if (lang)
+                                handleTranslate(message.message_id, lang);
+                            }}
+                            className="p-1 text-sm border rounded"
+                          >
+                            <option value="">Translate to...</option>
+                            {supportedLanguages.map((lang) => (
+                              <option key={lang} value={lang}>
+                                {lang}
+                              </option>
+                            ))}
+                          </select>
+                          {translatedMessages[message.message_id] && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="ml-2 text-xs text-blue-500 hover:text-blue-700"
+                              onClick={() =>
+                                handleShowOriginal(message.message_id)
+                              }
+                            >
+                              Show Original
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                      <p className="text-xs text-gray-400 mt-1 text-right">
+                        {new Date(message.created_at).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        )}
+
+        {/* Input Area */}
+        {!isLoading && (
+          <div className="p-4 border-t bg-white sticky bottom-0">
+            <div className="flex items-center space-x-2">
+              <Input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Type a message..."
+                className="flex-1 h-10 rounded-full border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !sending && newMessage.trim()) {
+                    handleSendMessage();
+                  }
+                }}
+              />
+              <Button
+                onClick={handleSendMessage}
+                disabled={sending || !newMessage.trim()}
+                className="rounded-full bg-blue-500 hover:bg-blue-600 text-white w-10 h-10 flex items-center justify-center"
+              >
+                {sending ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Send className="h-5 w-5" />
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
