@@ -1,4 +1,4 @@
-# 🧵 Meti - Personalized Batik Tailoring Platform
+# 🧵 Meti - Personalized Apparel Tailoring Platform
 
 <p align="start">
   <img src="https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/dummy/LOGO_text.png" width="300" alt="Logo" />
