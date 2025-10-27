@@ -1,17 +1,18 @@
 "use client";
 
 import { ArrowLeft, Plus, Heart, Share2, Star } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 
-interface ProductPageProps {
-  params: {
-    id: string;
-  };
-}
+// interface ProductPageProps {
+//   params: {
+//     id: string;
+//   };
+// }
 
-export default function ProductPage({ params }: ProductPageProps) {
+export default function ProductPage() {
   const router = useRouter();
+  const { id } = useParams<{ id: string }>();
   const [selectedColor, setSelectedColor] = useState(0);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
@@ -19,7 +20,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   // Mock product data - in real app, fetch based on params.id
   const product = {
-    id: params.id,
+    id: id,
     name: "Example Batik",
     price: 299,
     originalPrice: 399,
