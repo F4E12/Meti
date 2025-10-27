@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest  } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { Message } from "@/lib/model/message";
 import { User } from "@/lib/model/user";
@@ -34,7 +34,7 @@ interface SupabaseMessage {
 }
 
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const supabase = createClient();
@@ -224,7 +224,7 @@ export async function POST(
 }
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const supabase = createClient();
