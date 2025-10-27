@@ -3,10 +3,11 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const {id} = await params;
   const supabase = createClient();
-  const tailorId = params.id;
+  const tailorId = id;
 
   const { count, error } = await (await supabase)
     .from("orders")

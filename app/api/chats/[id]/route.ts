@@ -42,10 +42,11 @@ interface SupabaseMessage {
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+ { params }: { params: Promise<{ id: string }> }
 ) {
+  const {id} = await params;
   const supabase = createClient();
-  const chatId = params.id;
+  const chatId = id;
 
   // console.log("Params:", params);
   // console.log("Chat ID:", chatId);

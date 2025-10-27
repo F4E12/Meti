@@ -35,10 +35,11 @@ interface SupabaseMessage {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const {id} = await params;
   const supabase = createClient();
-  const chatId = params.id;
+  const chatId = id;
 
   console.log("POST /api/chats/[id]/messages called with chatId:", chatId);
 
@@ -225,10 +226,11 @@ export async function POST(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const {id} = await params;
   const supabase = createClient();
-  const chatId = params.id;
+  const chatId = id;
 
   console.log("GET /api/chats/[id]/messages called with chatId:", chatId);
 
