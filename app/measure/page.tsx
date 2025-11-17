@@ -1,8 +1,10 @@
+// MeasurePage.tsx
+
 "use client";
 
 import type React from "react";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import {
   ArrowLeft,
   Camera,
@@ -14,8 +16,28 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/headers/header";
+import { User } from "@/lib/model/user";
 
 export default function MeasurePage() {
+  const [user, setUser] = useState<User | null>(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/api/user");
+        if (!res.ok) {
+          console.error("Failed to fetch user:", res.statusText);
+          return null;
+        }
+        const data: { user: User } = await res.json();
+        setUser(data.user);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        setUser(null);
+      }
+    };
+    fetchUser();
+  }, []);
+
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -114,6 +136,7 @@ export default function MeasurePage() {
   const retakePhoto = useCallback(() => {
     setCapturedImage(null);
     startCamera();
+    setShowManualInput(false); // Reset manual input visibility on retake
   }, [startCamera]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,6 +146,8 @@ export default function MeasurePage() {
       reader.onload = (e) => {
         setCapturedImage(e.target?.result as string);
         stopCamera();
+        setCameraMode(true);
+        setShowManualInput(false); // Reset manual input visibility on new upload
       };
       reader.readAsDataURL(file);
     }
@@ -150,33 +175,126 @@ export default function MeasurePage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = () => {
-    if (validateForm()) {
-      console.log("Saving measurements:", measurements);
-      if (capturedImage) {
-        console.log("Captured image:", capturedImage);
+  const handleSave = async () => {
+    if (!validateForm()) {
+      return; // Stop if validation fails
+    }
+
+    // Prepare data by mapping local keys to API keys
+    // The measurement keys already match the database columns (right_arm_length, shoulder_width, etc.)
+    const measurementPayload = {
+      username: user?.username, // Placeholder, replace with actual username if needed
+      email: user?.email, // Placeholder, replace with actual email if needed
+      right_arm_length: measurements.right_arm_length,
+      shoulder_width: measurements.shoulder_width,
+      left_arm_length: measurements.left_arm_length,
+      upper_body_height: measurements.upper_body_height,
+      hip_width: measurements.hip_width,
+      // You might also need to include the user's current role, username, and email
+      // if your /api/user/update route expects them for validation.
+      // For a simple measurement update, we'll focus on the required measurement fields.
+      // If the API requires username/email, you'd need to fetch them or pass them down as props.
+    };
+
+    try {
+      // Show loading state (if you implement one)
+      // setLoading(true);
+
+      const response = await fetch("/api/user/update", {
+        method: "POST", // Use POST method as defined in /api/user/update/route.ts
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(measurementPayload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("API Update Error:", errorData.error);
+        alert(
+          `Failed to save measurements: ${errorData.error || "Unknown error"}`
+        );
+        return;
       }
+
+      // Success: Log the result and navigate
+      const result = await response.json();
+      console.log("Measurements saved successfully:", result.user);
+
+      // Navigate to the profile page
       router.push("/profile");
+    } catch (error) {
+      console.error("Network or Unexpected Error:", error);
+      alert("An unexpected error occurred while saving.");
+    } finally {
+      // Hide loading state
+      // setLoading(false);
     }
   };
 
+  const dataURLtoFile = (dataurl: string, filename: string) => {
+    const arr = dataurl.split(",");
+    const mimeMatch = arr[0].match(/:(.*?);/);
+    if (!mimeMatch) throw new Error("Invalid data URL format");
+    const mime = mimeMatch[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  };
+
   const processWithAI = async () => {
-    if (capturedImage) {
-      // Here you would send the image to your AI processing endpoint
-      console.log("Processing image with AI...");
-      // Simulate AI processing
-      setTimeout(() => {
-        setMeasurements({
-          right_arm_length: "58.5",
-          shoulder_width: "42.0",
-          left_arm_length: "58.0",
-          upper_body_height: "65.5",
-          hip_width: "38.5",
-        });
-        setShowManualInput(true);
-      }, 2000);
+    if (!capturedImage) {
+      alert("Please capture or upload an image first.");
+      return;
+    }
+
+    try {
+      // 1. Convert Data URL to a File object
+      // Use the helper function to create a File object from the captured image Data URL
+      const imageFile = dataURLtoFile(capturedImage, "measurement_photo.jpg");
+
+      // Create a FormData object to send the file
+      const formData = new FormData();
+      formData.append("file", imageFile);
+
+      // 2. Make the API Call
+      const response = await fetch("http://127.0.0.1:5000/api/process-image", {
+        method: "POST",
+        body: formData, // Automatically sets Content-Type to multipart/form-data
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error("AI Processing Error:", result.error);
+        alert(`Error processing image: ${result.error || "Unknown error"}`);
+        return;
+      }
+
+      // 3. Update State with Measurements and Annotated Image
+      const formattedMeasurements = {
+        right_arm_length: result.measurements["Right arm length"],
+        shoulder_width: result.measurements["Shoulder width"],
+        left_arm_length: result.measurements["Left arm length"],
+        upper_body_height: result.measurements["Upper body height"],
+        hip_width: result.measurements["Hip width"],
+      };
+
+      setMeasurements(formattedMeasurements);
+      // setCapturedImage(result.image_url); // Update to show the annotated image URL
+      setShowManualInput(true);
+    } catch (error) {
+      console.error("Network or Conversion Error:", error);
+      alert("An unexpected error occurred during image processing.");
     }
   };
+
+  // Logic to determine if the Manual Input section should be visible
+  const shouldShowManualInput = showManualInput || !cameraMode || capturedImage;
 
   return (
     <div className="min-h-screen bg-meti-cream">
@@ -202,7 +320,11 @@ export default function MeasurePage() {
         <div className="flex justify-center mb-8">
           <div className="bg-white rounded-lg p-1 flex">
             <button
-              onClick={() => setCameraMode(true)}
+              onClick={() => {
+                setCameraMode(true);
+                setShowManualInput(false);
+                if (!capturedImage) startCamera(); // Only start if no image is present
+              }}
               className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
                 cameraMode
                   ? "bg-meti-teal text-white"
@@ -212,7 +334,11 @@ export default function MeasurePage() {
               Camera
             </button>
             <button
-              onClick={() => setCameraMode(false)}
+              onClick={() => {
+                setCameraMode(false);
+                stopCamera();
+                setShowManualInput(true); // Show manual input when switching to upload mode
+              }}
               className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
                 !cameraMode
                   ? "bg-meti-teal text-white"
@@ -377,11 +503,15 @@ export default function MeasurePage() {
                 className="hidden"
               />
             </div>
+            {/* Display uploaded image thumbnail in Upload Mode only if no image is captured in camera mode */}
+            {/* If you want to show a preview here, you would need a separate state variable for upload preview.
+                For now, we direct the user to the Camera Tab after upload.
+            */}
           </div>
         )}
 
         {/* Manual Input Section */}
-        {(showManualInput || !cameraMode) && (
+        {shouldShowManualInput && (
           <div className="bg-white rounded-2xl shadow-sm p-8">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-serif text-meti-dark">

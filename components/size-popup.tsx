@@ -89,7 +89,7 @@ export default function SizePopup({ sizeData, onClose }: SizePopupProps) {
           <div className="flex space-x-3 mt-6">
             <button
               className="flex-1 bg-meti-teal text-white py-2 px-4 rounded hover:bg-meti-teal/90 transition-colors text-sm"
-              onClick={redirect("/measure")}
+              onClick={() => redirect("/measure")}
             >
               Update Measurements
             </button>
