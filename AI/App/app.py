@@ -87,23 +87,60 @@ def upload_image():
 def recolor_image():
     data = request.get_json()
     image_id = data.get("image_id")
-    color_map = data.get("color_map")
-
+    
     if not image_id or image_id not in session_data:
         return jsonify({"error": "Invalid or missing image_id"}), 400
 
     meta = session_data[image_id]
-    image = cv2.imread(meta["path"])
-    original_colors = np.array(meta["colors"])
-    labels = np.array(meta["labels"])
-    new_colors = np.array(color_map)
+    original_path = meta["path"]
+    
+    try:
+        # 1. Read the original image from disk (Needed for processing)
+        image = cv2.imread(original_path)
+        if image is None:
+             raise FileNotFoundError(f"Original image file not found at {original_path}")
+             
+        # Get color mapping data and process
+        color_map = data.get("color_map")
+        original_colors = np.array(meta["colors"])
+        labels = np.array(meta["labels"])
+        new_colors = np.array(color_map)
 
-    recolored_img = replace_colors(image, original_colors, labels, new_colors)
+        recolored_img = replace_colors(image, original_colors, labels, new_colors)
 
-    output_path = os.path.join(RECOLORED_FOLDER, image_id)
-    cv2.imwrite(output_path, recolored_img)
+        # 2. Convert the recolored image to an in-memory buffer (No disk write)
+        is_success, buffer = cv2.imencode(".jpg", recolored_img)
+        if not is_success:
+            raise IOError("Could not encode image to JPG.")
+            
+        io_buf = io.BytesIO(buffer)
+        io_buf.seek(0)
 
-    return send_file(output_path, mimetype='image/jpeg')
+        # 3. Delete the original image file from disk (Cleanup Step 1)
+        if os.path.exists(original_path):
+            os.remove(original_path)
+            del session_data[image_id]
+
+        # 4. Return the in-memory buffer using send_file.
+        # Flask can stream from io.BytesIO without locking a disk file.
+        return send_file(
+            io_buf, 
+            mimetype='image/jpeg', 
+            as_attachment=False, 
+            download_name=f'{image_id}.jpg' # Used for filename if downloaded
+        )
+
+    except Exception as e:
+        print(f"Error during recolor process: {e}")
+        # Ensure cleanup of original file if error occurred before deletion step
+        if os.path.exists(original_path):
+            os.remove(original_path)
+        
+        # Cleanup session data if it exists
+        if image_id in session_data:
+            del session_data[image_id]
+
+        return jsonify({"error": str(e)}), 500
 
 app.config['UPLOAD_FOLDER'] = 'static/uploads/'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
@@ -435,6 +472,7 @@ def tile_pattern():
     tiled.save(buffer, format="PNG")
     buffer.seek(0)
     base64_result = base64.b64encode(buffer.read()).decode("utf-8")
+    
     return jsonify({"final_image_base64": base64_result})
 
 @app.route('/api/extract-patch', methods=['POST'])
@@ -470,10 +508,15 @@ def extract_patch():
     finally:
         # Clean up input image
         if temp_img_path and os.path.exists(temp_img_path):
-            try:
-                os.remove(temp_img_path)
-            except Exception as e:
-                print(f"Warning: could not delete temp image - {e}")
+            os.remove(temp_img_path)
+
+        # Clean up output patch image (MISSING IN YOUR CODE)
+        if output_patch and os.path.exists(output_patch):
+            os.remove(output_patch)
+
+        # Clean up debug image (MISSING IN YOUR CODE)
+        if debug_image and os.path.exists(debug_image):
+            os.remove(debug_image)
 
 @app.route('/api/image')
 def serve_image():
@@ -561,6 +604,58 @@ def extract_shirt_patch(image_path, output_patch_path="patch.png", output_debug_
 
         cv2.imwrite(output_patch_path, patch)
         print(f"Patch saved to {output_patch_path}")
+
+# Cleanup function
+import time
+# --- NEW IMPORTS ---
+
+# Function to check file age and delete
+def cleanup_uploads(max_age_seconds=3600): # 1 hour default
+    """Deletes files from UPLOAD_FOLDER and removes expired data from session_data."""
+    now = time.time()
+    deleted_count = 0
+    
+    # Clean up files in the directory
+    for filename in os.listdir(UPLOAD_FOLDER):
+        path = os.path.join(UPLOAD_FOLDER, filename)
+        
+        # Avoid deleting directories or files currently in use (like the 'uploads' folder itself if somehow listed)
+        if not os.path.isfile(path):
+            continue
+            
+        # Check file age
+        file_age = now - os.path.getmtime(path)
+        if file_age > max_age_seconds:
+            try:
+                os.remove(path)
+                deleted_count += 1
+                # Try to clean up corresponding session data too
+                if filename in session_data:
+                    del session_data[filename]
+            except Exception as e:
+                print(f"Error during cleanup of file {filename}: {e}")
+                
+    # Also remove any session data that refers to a non-existent (already deleted) file
+    keys_to_delete = [
+        key for key, meta in session_data.items() 
+        if not os.path.exists(meta['path'])
+    ]
+    
+    for key in keys_to_delete:
+        del session_data[key]
+
+    return deleted_count
+
+# --- NEW CLEANUP ROUTE (For manual testing) ---
+@app.route("/cleanup", methods=["POST"])
+def manual_cleanup():
+    """Manually triggers the file cleanup."""
+    deleted_count = cleanup_uploads(max_age_seconds=3600)
+    return jsonify({
+        "message": f"Cleanup complete. {deleted_count} files older than 1 hour were deleted.",
+        "remaining_sessions": len(session_data)
+    })
+
 
 # Run the Flask app
 if __name__ == "__main__":
