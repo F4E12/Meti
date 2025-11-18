@@ -1,13 +1,12 @@
 "use client";
 
 import type React from "react";
-import { ImageIcon } from "lucide-react";
-import { useState, useRef } from "react";
+import { ImageIcon, Tag as TagIcon } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import {
   Plus,
   Upload,
   X,
-  Tag,
   Package,
   Clock,
   CheckCircle,
@@ -17,6 +16,8 @@ import {
 import axios from "axios";
 import Header from "@/components/headers/header";
 import { createClient } from "@/lib/supabase/client";
+import { Design } from "@/lib/model/design";
+import { Tag } from "@/lib/model/tag";
 
 export default function WorkspacePage() {
   const [showNewDesignModal, setShowNewDesignModal] = useState(false);
@@ -26,76 +27,84 @@ export default function WorkspacePage() {
     name: "",
     image: null as File | null,
     extractedDesign: null as string | null,
-    // Changed to store an array of tag IDs (numbers)
     tags: [] as number[],
   });
   const [isExtracting, setIsExtracting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabaseBrowser = createClient();
 
-  // Mock data for orders
-  const orders = [
-    {
-      id: "ORD-001",
-      customerName: "Sarah Johnson",
-      item: "Batik Jacket",
-      status: "pending",
-      date: "2024-01-15",
-      price: 299,
-    },
-    {
-      id: "ORD-002",
-      customerName: "Michael Chen",
-      item: "Traditional Dress",
-      status: "in_progress",
-      date: "2024-01-14",
-      price: 459,
-    },
-  ];
+  // Real designs state
+  const [designs, setDesigns] = useState<Design[]>([]);
+  const [loadingDesigns, setLoadingDesigns] = useState(true);
 
-  // Modified available tags to be an array of objects with id and name
-  const availableTags = [
-    { id: 1, name: "Geometric" },
-    { id: 2, name: "Floral" },
-    { id: 3, name: "Animal" },
-    { id: 4, name: "Contemporary" },
-    { id: 5, name: "Abstract" },
-  ];
+  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
+  const [loadingTags, setLoadingTags] = useState(true);
+
+  // Fetch designs on mount
+  useEffect(() => {
+    async function fetchTags() {
+      try {
+        const { data, error } = await supabaseBrowser
+          .from("tags")
+          .select("tag_id, name")
+          .order("name");
+
+        if (error) throw error;
+
+        const formatted = data.map((t) => ({
+          id: t.tag_id,
+          name: t.name,
+        }));
+        setAvailableTags(formatted);
+      } catch (err) {
+        console.error("Failed to load tags:", err);
+      } finally {
+        setLoadingTags(false);
+      }
+    }
+
+    fetchTags();
+  }, []);
+
+  useEffect(() => {
+    async function fetchMyDesigns() {
+      setLoadingDesigns(true);
+      try {
+        const {
+          data: { user },
+        } = await supabaseBrowser.auth.getUser();
+
+        if (!user) {
+          setLoadingDesigns(false);
+          return;
+        }
+
+        console.log("User: ", user);
+        console.log("userId: ", user.id);
+
+        const res = await fetch(`/api/tailors/${user.id}/all-designs`);
+        const json = await res.json();
+
+        if (res.ok && json.designs) {
+          setDesigns(json.designs);
+        } else {
+          console.error(
+            "Failed to load designs:",
+            json.error || "Unknown error"
+          );
+        }
+      } catch (err) {
+        console.error("Error fetching designs:", err);
+      } finally {
+        setLoadingDesigns(false);
+      }
+    }
+
+    fetchMyDesigns();
+  }, []);
 
   // Create a Map for quick lookup of tag names by ID
   const tagMap = new Map(availableTags.map((tag) => [tag.id, tag.name]));
-
-  // Current designs (data structure remains for display purposes)
-  const currentDesigns = [
-    {
-      id: 1,
-      name: "Traditional Batik Jacket",
-      image: "/images/batik-dummy.jpg",
-      tags: ["Batik", "Traditional", "Jacket"],
-      color: "bg-meti-teal",
-    },
-    {
-      id: 2,
-      name: "Modern Woven Dress",
-      image: "/images/batik-dummy.jpg",
-      tags: ["Modern", "Dress", "Handwoven"],
-      color: "bg-meti-orange",
-    },
-    {
-      id: 3,
-      name: "Festival Ceremonial Robe",
-      image: "/images/batik-dummy.jpg",
-      tags: ["Festival", "Traditional", "Formal"],
-      color: "bg-meti-pink",
-    },
-    {
-      id: 4,
-      name: "Casual Batik Shirt",
-      image: "/images/batik-dummy.jpg",
-      tags: ["Batik", "Casual", "Shirt"],
-      color: "bg-meti-teal",
-    },
-  ];
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -246,27 +255,15 @@ export default function WorkspacePage() {
       {/* Header */}
       <Header />
       <div className="max-w-7xl mx-auto px-12 py-16">
-        {/* Page Header */}
         <div className="flex items-center justify-between mb-12">
           <div className="flex items-center space-x-4">
             <h1 className="text-4xl font-serif text-meti-dark">
               Your Workspace
             </h1>
-            <div className="w-12 h-12 bg-meti-teal rounded-xl"></div>
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex space-x-4 mb-12">
-          <button
-            onClick={() => setShowOrdersModal(true)}
-            className="relative bg-white border-2 border-gray-300 text-meti-dark px-6 py-3 rounded-full font-medium hover:border-meti-teal hover:text-meti-teal transition-colors flex items-center space-x-2"
-          >
-            <span>orders</span>
-            <div className="absolute -top-2 -right-2 w-6 h-6 bg-meti-teal text-white rounded-full flex items-center justify-center text-xs font-bold">
-              {orders.length}
-            </div>
-          </button>
           <button
             onClick={() => setShowNewDesignModal(true)}
             className="bg-white border-2 border-gray-300 text-meti-dark px-6 py-3 rounded-full font-medium hover:border-meti-teal hover:text-meti-teal transition-colors flex items-center space-x-2"
@@ -276,27 +273,34 @@ export default function WorkspacePage() {
           </button>
         </div>
 
-        {/* Current Designs Grid */}
+        {/* REAL DESIGNS GRID */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {currentDesigns.map((design, index) => {
-            const imageUrls = [
-              "https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/batik_creations/Firefly_generate%20Batik%20buttoned%20up%20shirt%20put%20on%20a%20manequin%20no%20head,%20in%20the%20color%20of%20brown,%20wh%20122594.jpg",
-              "https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/batik_creations/Firefly_generate%20Batik%20buttoned%20up%20shirt%20put%20on%20a%20manequin%20no%20head,%20in%20the%20color%20of%20dark%20blue%20122594.jpg",
-              "https://znesmqivmcecevioaejc.supabase.co/storage/v1/object/public/meti.storage/batik_creations/Firefly_generate%20Batik%20lots%20of%20motif%20%20buttoned%20up%20shirt%20put%20on%20a%20manequin%20no%20head,%20in%20the%20col%20102797.jpg",
-            ];
-            const imageUrl = imageUrls[index % imageUrls.length]; // Cycle through images if more designs than images
-
-            return (
+          {loadingDesigns ? (
+            [...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className="aspect-[4/5] bg-gray-200 rounded-2xl animate-pulse"
+              />
+            ))
+          ) : designs.length === 0 ? (
+            <div className="col-span-full text-center py-16 text-meti-dark/60">
+              <p className="text-2xl mb-4">No designs yet</p>
+              <p className="text-lg">
+                Create your first design to get started!
+              </p>
+            </div>
+          ) : (
+            designs.map((design) => (
               <div
                 key={design.id}
                 className="aspect-[4/5] rounded-2xl relative overflow-hidden group cursor-pointer hover:scale-105 transition-transform duration-300"
               >
                 <img
-                  src={imageUrl}
+                  src={design.image}
                   alt={design.name}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
                 <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                   <h3 className="text-white font-semibold text-sm mb-2">
                     {design.name}
@@ -318,8 +322,8 @@ export default function WorkspacePage() {
                   </div>
                 </div>
               </div>
-            );
-          })}
+            ))
+          )}
         </div>
       </div>
 
@@ -337,55 +341,6 @@ export default function WorkspacePage() {
               >
                 <X className="w-5 h-5" />
               </button>
-            </div>
-
-            <div className="p-6">
-              <div className="space-y-4">
-                {orders.map((order) => (
-                  <div key={order.id} className="bg-gray-50 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <span className="font-semibold text-meti-dark">
-                          {order.id}
-                        </span>
-                        <div
-                          className={`px-3 py-1 rounded-full text-xs font-medium flex items-center space-x-1 ${getStatusColor(
-                            order.status
-                          )}`}
-                        >
-                          {getStatusIcon(order.status)}
-                          <span className="capitalize">
-                            {order.status.replace("_", " ")}
-                          </span>
-                        </div>
-                      </div>
-                      <span className="text-meti-teal font-semibold">
-                        ${order.price}
-                      </span>
-                    </div>
-                    <div className="grid md:grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="text-meti-dark/70">Customer</p>
-                        <p className="font-medium text-meti-dark">
-                          {order.customerName}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-meti-dark/70">Item</p>
-                        <p className="font-medium text-meti-dark">
-                          {order.item}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-meti-dark/70">Order Date</p>
-                        <p className="font-medium text-meti-dark">
-                          {order.date}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         </div>
@@ -583,22 +538,30 @@ export default function WorkspacePage() {
                   Tags
                 </label>
                 {/* Modified to map over array of objects */}
-                <div className="flex flex-wrap gap-x-6 gap-y-3">
-                  {availableTags.map((tag) => (
-                    <label
-                      key={tag.id}
-                      className="flex items-center space-x-2 cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={newDesign.tags.includes(tag.id)}
-                        onChange={() => handleTagToggle(tag.id)}
-                        className="w-4 h-4 text-meti-teal border-gray-300 rounded focus:ring-meti-teal/20"
-                      />
-                      <span className="text-sm text-meti-dark">{tag.name}</span>
-                    </label>
-                  ))}
-                </div>
+                {loadingTags ? (
+                  <p className="text-sm text-meti-dark/60">Loading tags...</p>
+                ) : availableTags.length === 0 ? (
+                  <p className="text-sm text-meti-dark/60">No tags available</p>
+                ) : (
+                  <div className="flex flex-wrap gap-x-6 gap-y-3">
+                    {availableTags.map((tag) => (
+                      <label
+                        key={tag.id}
+                        className="flex items-center space-x-2 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={newDesign.tags.includes(tag.id)}
+                          onChange={() => handleTagToggle(tag.id)}
+                          className="w-4 h-4 text-meti-teal border-gray-300 rounded focus:ring-meti-teal/20"
+                        />
+                        <span className="text-sm text-meti-dark">
+                          {tag.name}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Selected Tags Display */}
@@ -614,7 +577,7 @@ export default function WorkspacePage() {
                         key={tagId}
                         className="bg-meti-teal/10 text-meti-teal px-3 py-1 rounded-full text-sm flex items-center space-x-1"
                       >
-                        <Tag className="w-3 h-3" />
+                        <TagIcon className="w-3 h-3" />
                         <span>{tagMap.get(tagId)}</span>
                       </span>
                     ))}
@@ -648,4 +611,7 @@ export default function WorkspacePage() {
       )}
     </div>
   );
+}
+function setLoadingDesigns(arg0: boolean) {
+  throw new Error("Function not implemented.");
 }
