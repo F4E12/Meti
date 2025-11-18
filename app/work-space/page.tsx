@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import Header from "@/components/headers/header";
+import { createClient } from "@/lib/supabase/client";
 
 export default function WorkspacePage() {
   const [showNewDesignModal, setShowNewDesignModal] = useState(false);
@@ -30,6 +31,7 @@ export default function WorkspacePage() {
   });
   const [isExtracting, setIsExtracting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const supabaseBrowser = createClient();
 
   // Mock data for orders
   const orders = [
@@ -137,37 +139,72 @@ export default function WorkspacePage() {
   };
 
   const handleCreateDesign = async () => {
-    const designImage =
-      uploadMode === "person" ? newDesign.extractedDesign : newDesign.image;
+    if (!newDesign.name) return;
 
-    if (newDesign.name && designImage) {
+    const imageToUpload =
+      uploadMode === "person"
+        ? newDesign.extractedDesign
+          ? await fetch(newDesign.extractedDesign).then((r) => r.blob()) // convert blob URL → Blob
+          : null
+        : newDesign.image;
+
+    if (!imageToUpload) {
+      alert("Please upload an image");
+      return;
+    }
+
+    try {
+      // 1. Upload to Supabase Storage directly from browser
+      const fileExt = imageToUpload.type.split("/")[1] || "png";
+      const fileName = `${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2)}.${fileExt}`;
+
+      const { data: uploadData, error: uploadError } = await (
+        await supabaseBrowser
+      ).storage
+        .from("meti.storage") // your bucket name
+        .upload(`designs/${fileName}`, imageToUpload, {
+          contentType: imageToUpload.type || "image/png",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error("Upload failed:", uploadError);
+        alert("Failed to upload image: " + uploadError.message);
+        return;
+      }
+
+      // 2. Get the public URL
+      const {
+        data: { publicUrl },
+      } = (await supabaseBrowser).storage
+        .from("meti.storage")
+        .getPublicUrl(`designs/${fileName}`);
+
+      // 3. Save design metadata + URL to database via API route
       const res = await fetch("/api/tailors/create-design", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: newDesign.name,
-          image: designImage,
-          extractedDesign: newDesign.extractedDesign,
-          tags: newDesign.tags, // This now sends an array of IDs, e.g., [1, 3]
+          imageUrl: publicUrl, // ← now a real URL!
+          tags: newDesign.tags,
         }),
       });
 
       const result = await res.json();
+
       if (res.ok) {
-        console.log("✅ Design saved:", result.data);
-        setShowNewDesignModal(false);
-        setNewDesign({
-          name: "",
-          image: null,
-          extractedDesign: null,
-          tags: [],
-        });
-        setUploadMode("design");
+        console.log("Design saved:", result.data);
+        resetModal();
+        // Optionally refresh designs list
       } else {
-        console.error("❌ Error saving design:", result.error);
+        alert("Error saving design: " + result.error);
       }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong");
     }
   };
 
