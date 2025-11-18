@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { ImageIcon, Tag as TagIcon } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, MouseEvent } from "react";
 import {
   Plus,
   Upload,
@@ -121,6 +121,31 @@ export default function WorkspacePage() {
         ? prev.tags.filter((id) => id !== tagId)
         : [...prev.tags, tagId],
     }));
+  };
+
+  const handleDelete = async (e: MouseEvent, design: Design) => {
+    e.stopPropagation();
+    if (!confirm(`Delete "${design.name}"? This cannot be undone.`)) {
+      return;
+    }
+
+    console.log("designId: ", design.id);
+
+    try {
+      // setDesigns((prev) => prev.filter((d) => d.id !== design.id));
+      const res = await fetch(`/api/designs/${design.id}/delete`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const json = await res.json();
+        alert(json.error || "Failed to delete design");
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Network error");
+      window.location.reload();
+    }
   };
 
   const handleExtractDesign = async () => {
@@ -295,12 +320,22 @@ export default function WorkspacePage() {
                 key={design.id}
                 className="aspect-[4/5] rounded-2xl relative overflow-hidden group cursor-pointer hover:scale-105 transition-transform duration-300"
               >
+                {/* --- Delete Button --- */}
+                <button
+                  onClick={(e) => handleDelete(e, design)}
+                  className="absolute top-4 right-4 bg-red-600/80 hover:bg-red-600 text-white p-2 rounded-full backdrop-blur-sm transition-all hover:scale-110 opacity-0 group-hover:opacity-100 z-10"
+                  title="Delete design"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+
+                {/* --- Card Content --- */}
                 <img
                   src={design.image}
                   alt={design.name}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/70 transition-colors" />
                 <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                   <h3 className="text-white font-semibold text-sm mb-2">
                     {design.name}

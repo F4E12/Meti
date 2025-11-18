@@ -18,7 +18,7 @@ export async function GET() {
     );
   }
 
-  console.log("Authenticated user ID:", authUser.id);
+  // console.log("Authenticated user ID:", authUser.id);
 
   // Fetch user from Users table
   const { data: userData, error: dbError } = await (
@@ -46,8 +46,8 @@ export async function GET() {
     .eq("user_id", authUser.id)
     .single();
 
-  console.log("Query result - userData:", userData);
-  console.log("Query result - dbError:", dbError);
+  // console.log("Query result - userData:", userData);
+  // console.log("Query result - dbError:", dbError);
 
   if (dbError || !userData) {
     console.log(
