@@ -1,0 +1,1 @@
+"D:\Software\environments\310py\Scripts\activate.bat"

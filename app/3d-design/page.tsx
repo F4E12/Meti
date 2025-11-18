@@ -8,6 +8,9 @@ import { FaUpload, FaLayerGroup } from "react-icons/fa";
 import { ArrowLeft, Edit3, Check, X, Save, Download, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/headers/header";
+import { createClient } from "@/lib/supabase/client";
+import { NextResponse } from "next/server";
+import { ExportModal } from "@/components/export-modal";
 
 const CreateDesignPage = () => {
   const router = useRouter();
@@ -23,6 +26,9 @@ const CreateDesignPage = () => {
   const [isEditTitle, setIsEditTitle] = useState(false);
   const [title, setTitle] = useState("PROJECT TITLE");
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Initialize image and pattern with /assets/megamendung.jpg
   useEffect(() => {
@@ -55,6 +61,68 @@ const CreateDesignPage = () => {
     }
   }, [image, pattern]);
 
+  const dataURLtoBlob = (dataurl: string) => {
+    const arr = dataurl.split(",");
+    const mimeMatch = arr[0].match(/:(.*?);/);
+    const mime = mimeMatch ? mimeMatch[1] : "application/octet-stream";
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  };
+
+  const handleUploadConfirm = async (filename: string) => {
+    const supabase = createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await (await supabase).auth.getUser();
+    const userId = user?.id;
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (isUploading || !combinedTextureUrl || !userId) return;
+
+    setIsUploading(true);
+    setIsProcessing(true); // Use isProcessing for general app loading state
+
+    try {
+      // 1. Convert the Base64 Data URL to a Blob
+      const imageBlob = dataURLtoBlob(combinedTextureUrl);
+
+      // 2. Define the storage path, ensuring the filename is sanitized and appended with .png
+      const sanitizedFilename = filename.replace(/[^a-zA-Z0-9]/g, "_");
+      const path = `user_designs/${userId}/${sanitizedFilename}.png`;
+
+      // 3. Upload to Supabase Storage (Mocked call)
+      const { data, error } = await supabase.storage
+        .from("meti.storage") // Assuming your bucket name is 'user_designs'
+        .upload(path, imageBlob, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (error) {
+        console.error("Supabase Upload Error:", error);
+        alert(`Export failed: ${error.message}. Check console for details.`);
+      } else {
+        console.log("Export Successful!", data);
+        alert(`Design successfully exported to Supabase Storage as ${path}.`);
+        setIsModalOpen(false); // Close modal on success
+      }
+    } catch (error) {
+      console.error("General Export Error:", error);
+      alert("An unexpected error occurred during export.");
+    } finally {
+      setIsUploading(false);
+      setIsProcessing(false);
+    }
+  };
+
   const handleCombinedTextureGenerated = (dataUrl: string) => {
     setCombinedTextureUrl(dataUrl);
     console.log(
@@ -65,6 +133,11 @@ const CreateDesignPage = () => {
 
   const handleGenerate = () => {
     setTriggerGenerate(true);
+  };
+  const handleExport = () => {
+    setTriggerGenerate(true);
+
+    setIsModalOpen(true);
   };
 
   const handleUpdateTile = async () => {
@@ -92,6 +165,10 @@ const CreateDesignPage = () => {
       const result = await response.json();
       const dataUrl = `data:image/png;base64,${result.final_image_base64}`;
       if (dataUrl.startsWith("data:image/")) {
+        // console.log(
+        //   "Received tiled image data URL:",
+        //   dataUrl.substring(0, 50) + "..."
+        // );
         setPattern(dataUrl);
       } else {
         console.error("Invalid tiled image format");
@@ -179,7 +256,7 @@ const CreateDesignPage = () => {
           </div>
 
           {/* Quick Colors */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <h3 className="text-lg font-serif text-meti-dark">Quick Colors</h3>
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 rounded-full bg-meti-teal cursor-pointer hover:scale-110 transition-transform shadow-md" />
@@ -189,22 +266,38 @@ const CreateDesignPage = () => {
                 +
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Main Content Area */}
         <div className="flex-1 p-8">
           <div className="flex justify-center items-center h-full space-x-12">
-            {/* 3D Viewer */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-              <h3 className="text-lg font-serif text-meti-dark mb-4 text-center">
-                3D Preview
-              </h3>
-              <div className="w-96 h-96 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden shadow-inner">
-                <ThreeShirtViewer
-                  combinedTextureFromCanvas={combinedTextureUrl}
-                />
+            <div className="">
+              {/* 3D Viewer */}
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+                <h3 className="text-lg font-serif text-meti-dark mb-4 text-center">
+                  3D Preview
+                </h3>
+                <div className="w-96 h-96 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden shadow-inner">
+                  <ThreeShirtViewer
+                    combinedTextureFromCanvas={combinedTextureUrl}
+                  />
+                </div>
               </div>
+
+              <div className="pt-4 border-t border-gray-200">
+                <button
+                  className="w-full bg-meti-teal text-white py-4 px-6 rounded-xl font-semibold hover:bg-meti-teal/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  onClick={handleGenerate}
+                >
+                  <div className="flex items-center justify-center space-x-2">
+                    <Eye className="w-5 h-5" />
+                    <span>Preview Design</span>
+                  </div>
+                </button>
+              </div>
+
+              {/* <img src={combinedTextureUrl || ""} alt="" /> */}
             </div>
 
             {/* Canvas Editor */}
@@ -301,7 +394,7 @@ const CreateDesignPage = () => {
             </div>
           </div>
 
-          {/* Layer Properties */}
+          {/* Layer Properties
           <div className="space-y-4">
             <h3 className="text-lg font-serif text-meti-dark">
               Layer Properties
@@ -331,21 +424,27 @@ const CreateDesignPage = () => {
                 </select>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Quick Actions */}
 
-          {/* Save Button */}
           <div className="pt-4 border-t border-gray-200">
             <button
               className="w-full bg-meti-teal text-white py-4 px-6 rounded-xl font-semibold hover:bg-meti-teal/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              onClick={handleGenerate}
+              onClick={handleExport}
             >
               <div className="flex items-center justify-center space-x-2">
                 <Save className="w-5 h-5" />
-                <span>SAVE DESIGN</span>
+                <span>Export Design</span>
               </div>
             </button>
+            <ExportModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              onConfirm={handleUploadConfirm}
+              isUploading={isUploading}
+              title={title}
+            />
           </div>
         </div>
       </div>

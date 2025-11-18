@@ -55,7 +55,7 @@ const ThreeShirtViewer: React.FC<ThreeShirtViewerProps> = ({
     rendererRef.current = renderer;
 
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, 6.5, 0);
+    controls.target.set(0, 6.1, 0);
     controls.update();
     controlsRef.current = controls;
 
@@ -275,7 +275,7 @@ const ThreeShirtViewer: React.FC<ThreeShirtViewerProps> = ({
       <div
         id="threejs-wrapper"
         ref={threeJsWrapperRef}
-        className="w-[360px] h-[360px]"
+        className="w-[400px] h-[400px]"
       />
       {/* <div style={{ marginTop: "20px", textAlign: "center" }}>
         <input
