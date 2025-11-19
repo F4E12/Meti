@@ -2,22 +2,103 @@
 
 import Header from "@/components/headers/header";
 import { Heart } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+
+interface Tag {
+  tag_id: number;
+  name: string;
+}
+
+interface DesignFromAPI {
+  design_id: string;
+  original_image_url: string;
+  description: string | null;
+  created_at: string | null;
+  tags: Tag[];
+}
+
+interface Design {
+  id: string;
+  name: string;
+  image: string;
+  tags: string[];
+}
+
+interface PaginatedResponse {
+  designs: DesignFromAPI[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
 
 export default function FeaturedWeaversPage() {
-  const [likedItems, setLikedItems] = useState<Set<number>>(new Set());
+  const [designs, setDesigns] = useState<Design[]>([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
+  const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
 
-  const toggleLike = (index: number) => {
-    const newLiked = new Set(likedItems);
-    if (newLiked.has(index)) {
-      newLiked.delete(index);
-    } else {
-      newLiked.add(index);
+  const fetchDesigns = async (pageNum: number) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/designs/get-all?page=${pageNum}`, {
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Failed to fetch: ${res.status} ${errorText}`);
+      }
+
+      const data: PaginatedResponse = await res.json();
+
+      const transformed: Design[] = data.designs.map((d) => ({
+        id: d.design_id,
+        name: d.description || "Untitled Design",
+        image: d.original_image_url,
+        tags: d.tags.map((t) => t.name),
+      }));
+
+      if (pageNum === 1) {
+        setDesigns(transformed);
+      } else {
+        setDesigns((prev) => [...prev, ...transformed]);
+      }
+
+      setHasMore(data.page < data.totalPages);
+    } catch (err) {
+      console.error("Error loading designs:", err);
+      if (page === 1) setDesigns([]);
+    } finally {
+      setLoading(false);
     }
-    setLikedItems(newLiked);
   };
 
-  // Featured weavers data
+  useEffect(() => {
+    fetchDesigns(1);
+  }, []);
+
+  useEffect(() => {
+    if (page > 1) fetchDesigns(page);
+  }, [page]);
+
+  const toggleLike = (designId: string) => {
+    setLikedItems((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(designId)) {
+        newSet.delete(designId);
+      } else {
+        newSet.add(designId);
+      }
+      return newSet;
+    });
+  };
+
+  const loadMore = () => setPage((p) => p + 1);
+
   const featuredWeavers = [
     {
       name: "Master Weaver Sari",
@@ -39,158 +120,29 @@ export default function FeaturedWeaversPage() {
     },
   ];
 
-  // Border colors for the masonry grid
-  const borderColors = [
-    "border-meti-pink",
-    "border-meti-orange",
-    "border-meti-teal",
-    "border-meti-pink",
-    "border-meti-teal",
-    "border-meti-orange",
-    "border-meti-pink",
-    "border-meti-teal",
-    "border-meti-orange",
-    "border-meti-pink",
-    "border-meti-orange",
-    "border-meti-teal",
-  ];
-
-  // New designs data - using different sizes for masonry layout
-  const newDesigns = [
-    {
-      id: 1,
-      name: "Batik Jacket",
-      price: 299,
-      size: "large",
-      image: "/Random batik clothes/image (1).jpg",
-    },
-    {
-      id: 2,
-      name: "Woven Scarf",
-      price: 89,
-      size: "small",
-      image: "/Random batik clothes/image (2).jpg",
-    },
-    {
-      id: 3,
-      name: "Traditional Dress",
-      price: 459,
-      size: "medium",
-      image: "/Random batik clothes/image (3).jpg",
-    },
-    {
-      id: 4,
-      name: "Handwoven Bag",
-      price: 129,
-      size: "small",
-      image: "/Random batik clothes/image (4).jpg",
-    },
-    {
-      id: 5,
-      name: "Ceremonial Robe",
-      price: 699,
-      size: "large",
-      image: "/Random batik clothes/image (5).jpg",
-    },
-    {
-      id: 6,
-      name: "Silk Blouse",
-      price: 199,
-      size: "medium",
-      image: "/Random batik clothes/image (6).jpg",
-    },
-    {
-      id: 7,
-      name: "Woven Belt",
-      price: 59,
-      size: "small",
-      image: "/Random batik clothes/image (7).jpg",
-    },
-    {
-      id: 8,
-      name: "Festival Outfit",
-      price: 399,
-      size: "large",
-      image: "/Random batik clothes/image (8).jpg",
-    },
-    {
-      id: 9,
-      name: "Cotton Sarong",
-      price: 149,
-      size: "medium",
-      image: "/Random batik clothes/image (9).jpg",
-    },
-    {
-      id: 10,
-      name: "Embroidered Shawl",
-      price: 179,
-      size: "small",
-      image: "/Random batik clothes/image (10).jpg",
-    },
-    {
-      id: 11,
-      name: "Traditional Vest",
-      price: 249,
-      size: "medium",
-      image: "/Random batik clothes/image (11).jpg",
-    },
-    {
-      id: 12,
-      name: "Woven Headband",
-      price: 39,
-      size: "small",
-      image: "/Random batik clothes/image (12).jpg",
-    },
-  ];
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
       <Header />
 
-      <div className="max-w-7xl mx-auto px-12 py-16 relative">
-        {/* Decorative pink background element */}
-        <div className="absolute top-0 left-0 w-80 h-80 bg-meti-pink/20 rounded-full -translate-x-32 -translate-y-16"></div>
-
-        {/* Curved decorative lines */}
-        <svg
-          className="absolute top-64 right-0 w-96 h-32 text-meti-pink"
-          viewBox="0 0 400 120"
-        >
-          <path
-            d="M0,60 Q200,0 400,60"
-            stroke="currentColor"
-            strokeWidth="2"
-            fill="none"
-          />
-        </svg>
-
-        <svg
-          className="absolute bottom-96 left-0 w-64 h-32 text-meti-pink"
-          viewBox="0 0 300 120"
-        >
-          <path
-            d="M0,60 Q150,120 300,60"
-            stroke="currentColor"
-            strokeWidth="2"
-            fill="none"
-          />
-        </svg>
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 py-16 relative">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-slate-200/30 to-slate-100/20 rounded-full -translate-x-48 -translate-y-24 blur-3xl pointer-events-none"></div>
 
         {/* Featured Weavers Section */}
-        <section className="mb-20 relative z-10">
+        <section className="mb-24 relative z-10">
           <div className="mb-12">
-            <h1 className="text-5xl font-serif text-meti-pink leading-tight">
+            <h1 className="text-5xl lg:text-6xl font-serif text-slate-900 leading-tight">
               FEATURED
               <br />
               WEAVERS
             </h1>
+            <p className="text-lg text-slate-600 mt-4 max-w-lg font-light">
+              Discover master artisans crafting traditional Indonesian textiles
+            </p>
           </div>
-
-          <div className="grid md:grid-cols-3 gap-8 w-2/3 mx-auto">
+          <div className="grid md:grid-cols-3 gap-8">
             {featuredWeavers.map((weaver, index) => (
               <div key={index} className="group cursor-pointer">
-                <div className="aspect-[3/4] bg-white rounded-lg overflow-hidden mb-6 relative shadow-sm">
+                <div className="aspect-[3/4] bg-white rounded-xl overflow-hidden mb-6 relative shadow-sm hover:shadow-md transition-all duration-500">
                   <img
                     src={weaver.image || "/placeholder.svg"}
                     alt={weaver.name}
@@ -198,11 +150,11 @@ export default function FeaturedWeaversPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="font-semibold text-meti-dark text-lg">
+                  <h3 className="font-semibold text-slate-900 text-lg">
                     {weaver.name}
                   </h3>
-                  <p className="text-meti-dark/70 text-sm">{weaver.location}</p>
-                  <p className="text-meti-teal font-medium text-sm">
+                  <p className="text-slate-600 text-sm">{weaver.location}</p>
+                  <p className="text-slate-700 font-medium text-sm pt-1">
                     {weaver.specialty}
                   </p>
                 </div>
@@ -213,79 +165,112 @@ export default function FeaturedWeaversPage() {
 
         {/* New Designs Section */}
         <section className="relative z-10">
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center space-x-8 mb-8">
-              <span className="text-meti-orange text-sm font-medium">
-                POPULAR
-              </span>
-              <h2 className="text-3xl font-serif text-meti-orange">
-                NEW DESIGNS
-              </h2>
-              <span className="text-meti-orange text-sm font-medium">
-                FOR YOU
-              </span>
-            </div>
+          <div className="text-center mb-16">
+            <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">
+              COLLECTION
+            </p>
+            <h2 className="text-4xl lg:text-5xl font-serif text-slate-900 mb-4">
+              All Designs
+            </h2>
+            <p className="text-lg text-slate-600 max-w-xl mx-auto font-light">
+              Explore our complete collection of contemporary and traditional
+              patterns
+            </p>
           </div>
 
-          {/* Masonry Grid Layout with Colorful Borders */}
-          <div className="columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6">
-            {newDesigns.map((item, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-[420px]">
+            {designs.map((design, index) => (
               <div
-                key={item.id}
-                className={`break-inside-avoid bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group cursor-pointer border-2 ${
-                  borderColors[index]
-                } ${
-                  item.size === "large"
-                    ? "aspect-[3/4]"
-                    : item.size === "medium"
-                    ? "aspect-[4/5]"
-                    : "aspect-square"
-                }`}
+                key={design.id}
+                className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-2 transition-all duration-300 group cursor-pointer border border-slate-200/50 flex flex-col"
               >
-                <div className="relative overflow-hidden h-full flex items-center justify-center">
-                  {/* Placeholder content with colored circle */}
+                <div className="relative flex-1 overflow-hidden bg-slate-100">
                   <img
-                    src={item.image || "/placeholder.svg"}
-                    alt={item.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    src={design.image || "/placeholder.svg"}
+                    alt={design.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
 
-                  {/* Special pagination element for one card */}
-                  {index === 7 && (
-                    <div className="absolute bottom-6 right-6 bg-white rounded-full px-3 py-2 flex items-center space-x-1 shadow-sm">
-                      <div className="w-3 h-3 bg-black rounded-sm"></div>
-                      <div className="w-3 h-3 border border-black rounded-sm"></div>
-                      <div className="w-3 h-3 bg-black rounded-sm"></div>
+                  {design.tags.length > 0 && (
+                    <div className="absolute bottom-3 left-3 right-3 flex flex-wrap gap-2">
+                      {design.tags.slice(0, 2).map((tag, i) => (
+                        <span
+                          key={i}
+                          className="bg-white/90 backdrop-blur-md text-xs px-2.5 py-1 rounded-full font-medium text-slate-700 shadow-sm border border-white/20"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                      {design.tags.length > 2 && (
+                        <span className="bg-white/90 backdrop-blur-md text-xs px-2.5 py-1 rounded-full font-medium text-slate-700 shadow-sm border border-white/20">
+                          +{design.tags.length - 2}
+                        </span>
+                      )}
                     </div>
                   )}
 
-                  {/* Heart button */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggleLike(index);
+                      toggleLike(design.id);
                     }}
-                    className="absolute top-4 right-4 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white"
+                    className="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 shadow-md border border-white/20 hover:bg-white"
                   >
                     <Heart
-                      className={`w-4 h-4 ${
-                        likedItems.has(index)
-                          ? "text-meti-pink fill-meti-pink"
-                          : "text-meti-dark"
+                      className={`w-5 h-5 transition-all ${
+                        likedItems.has(design.id)
+                          ? "text-red-500 fill-red-500"
+                          : "text-slate-600"
                       }`}
                     />
                   </button>
                 </div>
+
+                <div className="p-4 bg-white border-t border-slate-100/50">
+                  <h3 className="font-medium text-slate-900 text-sm line-clamp-2 leading-snug">
+                    {design.name}
+                  </h3>
+                </div>
               </div>
             ))}
+
+            {/* Loading Skeletons */}
+            {loading &&
+              Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={`sk-${i}`}
+                  className="rounded-xl overflow-hidden bg-slate-100 border border-slate-200/50"
+                >
+                  <Skeleton className="w-full h-full" />
+                </div>
+              ))}
           </div>
 
           {/* Load More Button */}
-          <div className="text-center mt-12">
-            <button className="bg-meti-teal text-white px-8 py-3 rounded-lg font-medium hover:bg-meti-teal/90 transition-colors">
-              Load More Designs
-            </button>
-          </div>
+          {hasMore && !loading && (
+            <div className="text-center mt-20">
+              <Button
+                onClick={loadMore}
+                size="lg"
+                className="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-12 py-6 text-base rounded-lg transition-all hover:shadow-lg"
+              >
+                Load More Designs
+              </Button>
+            </div>
+          )}
+
+          {/* End States */}
+          {!hasMore && designs.length > 0 && (
+            <p className="text-center mt-20 text-slate-500 text-base font-light">
+              You&apos;ve viewed all designs in this collection
+            </p>
+          )}
+
+          {!loading && designs.length === 0 && (
+            <p className="text-center py-24 text-slate-400 text-lg font-light">
+              No designs available yet. Check back soon!
+            </p>
+          )}
         </section>
       </div>
     </div>
