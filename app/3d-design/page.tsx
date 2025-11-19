@@ -5,12 +5,23 @@ import ThreeShirtViewer from "@/components/tshirt-viewer";
 import ColorChanger from "@/components/color-changer";
 import { useState, useEffect } from "react";
 import { FaUpload, FaLayerGroup } from "react-icons/fa";
-import { ArrowLeft, Edit3, Check, X, Save, Download, Eye } from "lucide-react";
+import {
+  ArrowLeft,
+  Edit3,
+  Check,
+  X,
+  Save,
+  Download,
+  Eye,
+  ListOrdered,
+  ShoppingCart,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/headers/header";
 import { createClient } from "@/lib/supabase/client";
 import { NextResponse } from "next/server";
 import { ExportModal } from "@/components/export-modal";
+import NewOrderPopup from "@/components/new-order-popup";
 
 const CreateDesignPage = () => {
   const router = useRouter();
@@ -29,6 +40,8 @@ const CreateDesignPage = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+
+  const [isOrderOpen, setIsOrderOpen] = useState(false);
 
   // Initialize image and pattern with /assets/megamendung.jpg
   useEffect(() => {
@@ -138,6 +151,11 @@ const CreateDesignPage = () => {
     setTriggerGenerate(true);
 
     setIsModalOpen(true);
+  };
+  const handleOrder = () => {
+    setTriggerGenerate(true);
+
+    setIsOrderOpen(true);
   };
 
   const handleUpdateTile = async () => {
@@ -466,6 +484,23 @@ const CreateDesignPage = () => {
               onConfirm={handleUploadConfirm}
               isUploading={isUploading}
               title={title}
+            />
+          </div>
+          <div className="pt-4 border-t border-gray-200">
+            <button
+              className="w-full bg-meti-teal text-white py-4 px-6 rounded-xl font-semibold hover:bg-meti-teal/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              onClick={handleOrder}
+            >
+              <div className="flex items-center justify-center space-x-2">
+                <ShoppingCart className="w-5 h-5" />
+                <span>Order Now</span>
+              </div>
+            </button>
+
+            <NewOrderPopup
+              isOpen={isOrderOpen}
+              onClose={() => setIsOrderOpen(false)}
+              image={combinedTextureUrl || ""}
             />
           </div>
         </div>

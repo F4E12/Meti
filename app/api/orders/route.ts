@@ -192,6 +192,7 @@ export async function POST(request: Request) {
       status: "pending",
       design_url,
       order_date: new Date().toISOString(),
+      shipping_address: body.address || null,
     })
     .select()
     .single();
