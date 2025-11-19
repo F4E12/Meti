@@ -141,41 +141,63 @@ const CreateDesignPage = () => {
   };
 
   const handleUpdateTile = async () => {
+    // pattern should hold the data URL string (e.g., 'data:image/png;base64,...')
     if (!pattern) {
       alert("No pattern image available for tiling.");
       return;
     }
     setIsProcessing(true);
-    const payload = {
-      image: pattern,
-      x: xTile,
-      y: yTile,
-    };
-    console.log("Payload being sent:", payload);
+
+    let imageBlob;
+
+    // --- 1. Convert Data URL (Base64) back to a Blob object ---
+    try {
+      imageBlob = await fetch(pattern).then((res) => res.blob());
+
+      if (!imageBlob) {
+        throw new Error("Failed to convert pattern Data URL to Blob.");
+      }
+    } catch (error) {
+      console.error("Error converting Data URL to Blob:", error);
+      alert("Failed to prepare image data for upload.");
+      setIsProcessing(false);
+      return;
+    }
+
+    // --- 2. Create FormData object for multipart submission ---
+    const formData = new FormData();
+    // The key 'image_file' MUST match the server's request.files['image_file']
+    formData.append("image_file", imageBlob, "tile.png");
+    formData.append("x", String(xTile ?? 1));
+    formData.append("y", String(yTile ?? 1));
+
+    console.log("Sending data as multipart/form-data...");
+
+    // --- 3. Send the request ---
     try {
       const response = await fetch("http://127.0.0.1:5000/tile-pattern", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+        // IMPORTANT: Do NOT set Content-Type header manually.
+        // The browser sets 'multipart/form-data' automatically when using FormData.
+        body: formData,
       });
+
       if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
+
       const result = await response.json();
+
+      // The server still returns the result as a Base64 Data URL payload
       const dataUrl = `data:image/png;base64,${result.final_image_base64}`;
+
       if (dataUrl.startsWith("data:image/")) {
-        // console.log(
-        //   "Received tiled image data URL:",
-        //   dataUrl.substring(0, 50) + "..."
-        // );
         setPattern(dataUrl);
       } else {
-        console.error("Invalid tiled image format");
+        console.error("Invalid tiled image format received");
       }
     } catch (error) {
       console.error("Error sending data to Flask:", error);
-      alert("Failed to send image data to Flask.");
+      alert("Failed to process image tiling.");
     } finally {
       setIsProcessing(false);
     }

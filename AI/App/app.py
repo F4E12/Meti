@@ -441,20 +441,24 @@ def composite_images():
     
 @app.route("/tile-pattern", methods=["POST"])
 def tile_pattern():
-    data = request.get_json()
-    if not data or "image" not in data:
-        return jsonify({"error": "No image provided"}), 400
+    # --- New: Check for file upload (key should match client FormData key) ---
+    if 'image_file' not in request.files:
+        return jsonify({"error": "No image file provided"}), 400
+    
+    image_file = request.files['image_file']
+
+    # New: Read X and Y from form data instead of JSON
+    tile_count_x = int(request.form.get("x", 5))
+    tile_count_y = int(request.form.get("y", 5))
 
     try:
-        base64_str = data["image"].split(",")[-1]  # remove data:image/png;base64,
-        image_bytes = base64.b64decode(base64_str)
-        tile = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-
-        tile_count_x = int(data.get("x", 5))
-        tile_count_y = int(data.get("y", 5))
-
-    except:
-        return jsonify({"error": "Invalid image data"}), 400
+        # --- New: Open the image directly from the FileStorage object ---
+        # image_file is a FileStorage object; its .stream is the file content
+        tile = Image.open(image_file.stream).convert("RGB") 
+        
+    except Exception:
+        # Catch any errors during image opening/conversion
+        return jsonify({"error": "Invalid image data or corrupted file"}), 400
 
     tile_width, tile_height = tile.size
     canvas_width = tile_width * tile_count_x
@@ -462,12 +466,14 @@ def tile_pattern():
 
     tiled = Image.new("RGB", (canvas_width, canvas_height), color=(255, 255, 255))
     
+    # Tiling logic remains the same
     for ix in range(tile_count_x):
         for iy in range(tile_count_y):
             x_pos = ix * tile_width
             y_pos = iy * tile_height
             tiled.paste(tile, (x_pos, y_pos))
 
+    # Encoding the result back to Base64 remains the same
     buffer = io.BytesIO()
     tiled.save(buffer, format="PNG")
     buffer.seek(0)
