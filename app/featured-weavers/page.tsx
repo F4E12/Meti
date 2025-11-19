@@ -5,6 +5,7 @@ import { Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
 
 interface Tag {
   tag_id: number;
@@ -40,6 +41,7 @@ export default function FeaturedWeaversPage() {
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
+  const router = useRouter();
 
   const fetchDesigns = async (pageNum: number) => {
     setLoading(true);
@@ -183,6 +185,7 @@ export default function FeaturedWeaversPage() {
               <div
                 key={design.id}
                 className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-2 transition-all duration-300 group cursor-pointer border border-slate-200/50 flex flex-col"
+                onClick={() => router.push(`/3d-design/${design.id}`)}
               >
                 <div className="relative flex-1 overflow-hidden bg-slate-100">
                   <img

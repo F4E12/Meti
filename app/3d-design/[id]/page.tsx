@@ -16,7 +16,7 @@ import {
   ListOrdered,
   ShoppingCart,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Header from "@/components/headers/header";
 import { createClient } from "@/lib/supabase/client";
 import { NextResponse } from "next/server";
@@ -24,6 +24,7 @@ import { ExportModal } from "@/components/export-modal";
 import NewOrderPopup from "@/components/new-order-popup";
 
 const CreateDesignPage = () => {
+  const { id } = useParams();
   const router = useRouter();
   const [active, setActive] = useState(0);
   const [triggerGenerate, setTriggerGenerate] = useState(false);
@@ -47,7 +48,14 @@ const CreateDesignPage = () => {
   useEffect(() => {
     const loadImage = async () => {
       try {
-        const response = await fetch("/assets/megamendung.jpg");
+        let response = await fetch("/assets/megamendung.jpg");
+        if (id === "default") {
+          response = await fetch(`/assets/megamendung.jpg`);
+        } else {
+          const url = await fetch("/api/designs/get-img-url/" + id);
+          console.log("Fetched design URL:", url);
+          response = await fetch((await url.json()).original_image_url);
+        }
         if (!response.ok) {
           console.error("Image not found at /assets/megamendung.jpg");
           return;

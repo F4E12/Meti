@@ -46,7 +46,12 @@ const NAV_LINKS: NavLink[] = [
     icon: ShoppingBag,
     roles: ["customer"],
   },
-  { href: "/3d-design", label: "DESIGN", icon: Palette, roles: ["customer"] },
+  {
+    href: "/3d-design/default",
+    label: "DESIGN",
+    icon: Palette,
+    roles: ["customer"],
+  },
   { href: "/orders", label: "ORDERS", icon: Package, roles: ["customer"] },
   { href: "/tailors", label: "TAILORS", icon: Scissors, roles: ["customer"] },
 
