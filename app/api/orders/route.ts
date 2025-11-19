@@ -40,7 +40,7 @@ export async function GET() {
     const { data, error } = await (await supabase)
       .from("orders")
       .select(
-        "order_id, user_id, tailor_id, status, design_url, order_date, delivery_date, created_at"
+        "order_id, user_id, tailor_id, status, design_url, order_date, delivery_date, created_at, shipping_address"
       )
       .eq("user_id", authUser.id);
     orders = data;
@@ -49,7 +49,7 @@ export async function GET() {
     const { data, error } = await (await supabase)
       .from("orders")
       .select(
-        "order_id, user_id, tailor_id, status, design_url, order_date, delivery_date, created_at"
+        "order_id, user_id, tailor_id, status, design_url, order_date, delivery_date, created_at, shipping_address"
       )
       .eq("tailor_id", authUser.id);
     orders = data;

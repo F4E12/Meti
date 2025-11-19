@@ -39,7 +39,7 @@ export async function GET(
   const { data: orderData, error: orderError } = await (await supabase)
     .from("orders")
     .select(
-      "order_id, user_id, tailor_id, status, design_url, order_date, delivery_date, created_at"
+      "order_id, user_id, tailor_id, status, design_url, order_date, delivery_date, created_at, shipping_address"
     )
     .eq("order_id", order_id)
     .or(`user_id.eq.${authUser.id},tailor_id.eq.${authUser.id}`)

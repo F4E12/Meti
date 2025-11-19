@@ -64,6 +64,7 @@ export default function OrderDetailsPage() {
           return;
         }
         const orderData: { order: Order } = await orderRes.json();
+        console.log("Fetched Order Data:", orderData);
         setOrder(orderData.order);
       } catch (err) {
         setError("An error occurred");
@@ -397,6 +398,10 @@ export default function OrderDetailsPage() {
                       <p className="font-medium">
                         {format(new Date(order.order_date), "PPP")}
                       </p>
+                      <span className="text-sm text-muted-foreground">
+                        Shipping Address:
+                      </span>
+                      <p className="font-medium">{order.shipping_address}</p>
                     </div>
                   </div>
                   {order.delivery_date && (

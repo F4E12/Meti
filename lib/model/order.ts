@@ -11,4 +11,5 @@ export interface Order {
   created_at: string;
   tailor?: User & { bio?: string; rating: number };
   customer?: User;
+  shipping_address?: string;
 }
