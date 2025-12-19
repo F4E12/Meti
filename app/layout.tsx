@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
   title: "METI",
   description: "Weaving with cultures",
+  icons: {
+    icon: "/LOGO.svg",
+  },
 };
 
 const geistSans = Geist({
