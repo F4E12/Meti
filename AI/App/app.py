@@ -368,6 +368,12 @@ def handle_extract_shirt_patch():
     
     # Read image from filestorage object in memory
     filestr = file.read()
+
+    try:
+        file.close()
+    except Exception as e:
+        print(f"Warning: Could not close file handle: {e}") 
+
     npimg = np.frombuffer(filestr, np.uint8)
     image_bgr = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
 
@@ -511,18 +517,18 @@ def extract_patch():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-    finally:
-        # Clean up input image
-        if temp_img_path and os.path.exists(temp_img_path):
-            os.remove(temp_img_path)
+    # finally:
+    #     # Clean up input image
+    #     if temp_img_path and os.path.exists(temp_img_path):
+    #         os.remove(temp_img_path)
 
-        # Clean up output patch image (MISSING IN YOUR CODE)
-        if output_patch and os.path.exists(output_patch):
-            os.remove(output_patch)
+    #     # Clean up output patch image (MISSING IN YOUR CODE)
+    #     if output_patch and os.path.exists(output_patch):
+    #         os.remove(output_patch)
 
-        # Clean up debug image (MISSING IN YOUR CODE)
-        if debug_image and os.path.exists(debug_image):
-            os.remove(debug_image)
+    #     # Clean up debug image (MISSING IN YOUR CODE)
+    #     if debug_image and os.path.exists(debug_image):
+    #         os.remove(debug_image)
 
 @app.route('/api/image')
 def serve_image():

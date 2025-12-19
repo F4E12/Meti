@@ -17,6 +17,7 @@ import {
   Package,
   Search,
   BarChart3,
+  HelpCircle,
   LucideIcon,
   Bell,
 } from "lucide-react";
@@ -54,6 +55,18 @@ const NAV_LINKS: NavLink[] = [
   },
   { href: "/orders", label: "ORDERS", icon: Package, roles: ["customer"] },
   { href: "/tailors", label: "TAILORS", icon: Scissors, roles: ["customer"] },
+  {
+    href: "/how-to-use",
+    label: "HOW TO USE",
+    icon: HelpCircle,
+    roles: ["customer"],
+  },
+  {
+    href: "/how-to-use",
+    label: "HOW TO USE",
+    icon: HelpCircle,
+    roles: ["guest"],
+  },
 
   // Tailor Links
   { href: "/work-space", label: "DESIGN", icon: Palette, roles: ["tailor"] },
